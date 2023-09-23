@@ -12,8 +12,5 @@
         <module name="MusicBot" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="NCCBot" target="15" />
-    </bytecodeTargetLevel>
   </component>
 </project>

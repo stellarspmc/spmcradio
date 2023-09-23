@@ -50,25 +50,13 @@ public class EventHandler extends ListenerAdapter {
         switch (e.getName()) {
             case "musicselection" -> {
                 String string = Objects.requireNonNull(e.getOption("type")).getAsString();
-                switch (string) {
-                    case "minecraft" -> {
-                        MusicPlayer.type = MusicType.MINECRAFT;
-                        MusicPlayer.stopAndPlayNewList(MusicPlayer.type.getUrl());
-                    }
-                    case "ncs" -> {
-                        MusicPlayer.type = MusicType.NCS;
-                        MusicPlayer.stopAndPlayNewList(MusicPlayer.type.getUrl());
-                    }
-                    case "phonk" -> {
-                        MusicPlayer.type = MusicType.PHONK;
-                        MusicPlayer.stopAndPlayNewList(MusicPlayer.type.getUrl());
-                    }
-                    default -> {
-                        MusicPlayer.type = MusicType.SMP;
-                        MusicPlayer.stopAndPlayNewList(MusicPlayer.type.getUrl());
+                for (MusicType type: MusicType.values()) {
+                    if (string.equals(type.name().toLowerCase()) || string.equals(type.name().toUpperCase())) {
+                        MusicPlayer.type = type;
+                        MusicPlayer.stopAndPlayNewList(type.getUrl());
+                        e.reply("Changing to " + string + " type.").queue();
                     }
                 }
-                e.reply("Changing to " + string + " type.").queue();
             }
             case "appeal" -> {
                 TextInput menu = TextInput.create("from", "From", TextInputStyle.SHORT)
