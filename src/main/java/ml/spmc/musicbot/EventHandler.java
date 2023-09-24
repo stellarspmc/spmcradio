@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -85,13 +86,21 @@ public class EventHandler extends ListenerAdapter {
     @Override
     public void onCommandAutoCompleteInteraction(CommandAutoCompleteInteractionEvent event) {
         if (event.getName().equals("musicselection") && event.getFocusedOption().getName().equals("type")) {
-            String[] type = new String[]{"phonk", "ncs", "smp", "minecraft"};
+            ArrayList<String> string = new ArrayList<>();
+            for (MusicType type : MusicType.values()) {
+                string.add(type.name().toLowerCase());
+            }
+            try {
+                String[] type = string.toArray(new String[]{});
 
-            Collection<Command.Choice> options = Stream.of(type)
-                    .filter(word -> word.startsWith(event.getFocusedOption().getValue()))
-                    .map(word -> new Command.Choice(word, word))
-                    .collect(Collectors.toList());
-            event.replyChoices(options).queue();
+                Collection<Command.Choice> options = Stream.of(type)
+                        .filter(word -> word.startsWith(event.getFocusedOption().getValue()))
+                        .map(word -> new Command.Choice(word, word))
+                        .collect(Collectors.toList());
+                event.replyChoices(options).queue();
+            } catch (ClassCastException e) {
+                System.err.println(e.getMessage());
+            }
         }
     }
 
