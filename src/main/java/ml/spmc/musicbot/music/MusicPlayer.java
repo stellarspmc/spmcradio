@@ -13,16 +13,17 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 
+import java.util.Collections;
 import java.util.List;
 
 import static ml.spmc.musicbot.MusicBot.bot;
 
 public class MusicPlayer {
 
-    private static AudioPlayerManager manager = new DefaultAudioPlayerManager();
+    private static final AudioPlayerManager manager = new DefaultAudioPlayerManager();
     private static final MusicManager musicManager = new MusicManager(manager);
     private static final Guild guild = bot.getGuildById(Config.GUILD_ID);
-    private static AudioPlayer player = musicManager.player;
+    private static final AudioPlayer player = musicManager.player;
     public static MusicType type = MusicType.SMP;
     public static void playMusic() {
         final VoiceChannel channel = bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID);
@@ -46,10 +47,9 @@ public class MusicPlayer {
     }
 
     public static void stopAndPlayNewList(String playlist) {
-        player.destroy();
-        manager = new DefaultAudioPlayerManager();
-        player = manager.createPlayer();
-        play(playlist);
+        player.stopTrack();
+        musicManager.scheduler.startAnotherPlaylist();
+        loadPlaylist(playlist);
     }
 
     private static void play(String playlist) {
@@ -61,9 +61,10 @@ public class MusicPlayer {
             @Override
             public void playlistLoaded(AudioPlaylist playList) {
                 List<AudioTrack> tracks = playList.getTracks();
+                Collections.shuffle(tracks);
                 for (AudioTrack track: tracks) {
                     musicManager.scheduler.queue(track);
-                } musicManager.scheduler.shufflePlaylist();
+                }
             }
 
             @Override
