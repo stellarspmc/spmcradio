@@ -35,7 +35,7 @@ public class MusicPlayer {
             AudioSourceManagers.registerRemoteSources(manager);
             AudioSourceManagers.registerLocalSource(manager);
             manager2.setSelfDeafened(true);
-            player.setVolume(50);
+            player.setVolume(15);
         }
         if (player.isPaused()) player.setPaused(false);
         if (player.getVolume() == 0) player.setVolume(50);
