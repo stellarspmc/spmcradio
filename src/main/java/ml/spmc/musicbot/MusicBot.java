@@ -18,6 +18,4 @@ public class MusicBot {
          bot.awaitReady();
          MusicPlayer.playMusic();
     }
-
-
 }

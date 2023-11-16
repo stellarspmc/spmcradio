@@ -26,7 +26,7 @@ public class MusicPlayer {
     private static final AudioPlayer player = musicManager.player;
     public static MusicType type = MusicType.SMP;
     public static void playMusic() {
-        final VoiceChannel channel = bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID);
+        VoiceChannel channel = bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID);
         assert guild != null;
         final AudioManager manager2 = guild.getAudioManager();
         manager2.setSendingHandler(musicManager.getSendHandler());
@@ -35,7 +35,7 @@ public class MusicPlayer {
             AudioSourceManagers.registerRemoteSources(manager);
             AudioSourceManagers.registerLocalSource(manager);
             manager2.setSelfDeafened(true);
-            player.setVolume(15);
+            player.setVolume(5);
         }
         if (player.isPaused()) player.setPaused(false);
         if (player.getVolume() == 0) player.setVolume(50);
