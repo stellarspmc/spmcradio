@@ -1,6 +1,7 @@
 package ml.spmc.musicbot.music;
 
 public enum MusicType {
+    CHILL("https://youtube.com/playlist?list=PL7AMJQQdFhwZiWNJhnOAzr_lmpucY02Qs"),
     SMP("https://youtube.com/playlist?list=PLy_S3qOMUL1epiuCU4kBTOpLo1xOFJSLx"),
     NCS("https://youtube.com/playlist?list=PL7AMJQQdFhwa9W7PKH5u25BovEfeM_i75"),
     MINECRAFT("https://www.youtube.com/playlist?list=PLefKpFQ8Pvy5aCLAGHD8Zmzsdljos-t2l"),
