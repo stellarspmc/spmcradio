@@ -13,8 +13,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import static ml.spmc.musicbot.MusicBot.bot;
 
@@ -24,7 +24,8 @@ public class MusicPlayer {
     private static final MusicManager musicManager = new MusicManager(manager);
     private static final Guild guild = bot.getGuildById(Config.GUILD_ID);
     private static final AudioPlayer player = musicManager.player;
-    public static MusicType type = MusicType.SMP;
+    private static final ArrayList<String> queue = new ArrayList<>();
+
     public static void playMusic() {
         VoiceChannel channel = bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID);
         assert guild != null;
@@ -39,41 +40,49 @@ public class MusicPlayer {
         }
         if (player.isPaused()) player.setPaused(false);
         if (player.getVolume() == 0) player.setVolume(50);
-        loadPlaylist(type.getUrl());
+        play(MusicType.SMP.getUrl(), false);
     }
 
-    public static void loadPlaylist(String playlist) {
-        play(playlist);
+    public static void loopQueue() {
+        Collections.shuffle(queue);
+        for (String queue: queue) {
+            play(queue, true);
+        }
     }
 
-    public static void stopAndPlayNewList(String playlist) {
+    public static void stopAndPlay(String url) {
+        queue.clear();
+        musicManager.scheduler.clearQueue();
         player.stopTrack();
-        musicManager.scheduler.startAnotherPlaylist();
-        loadPlaylist(playlist);
+        play(url, false);
     }
 
-    private static void play(String playlist) {
-        manager.loadItem(playlist, new AudioLoadResultHandler() {
+    public static void play(String url, boolean repeat) {
+        manager.loadItem(url, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
+                if (!repeat) queue.add(track.getInfo().uri);
+                musicManager.scheduler.queue(track);
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist playList) {
-                List<AudioTrack> tracks = playList.getTracks();
-                Collections.shuffle(tracks);
-                for (AudioTrack track: tracks) {
+                if (!repeat) {
+                    for (AudioTrack track: playList.getTracks()) {
+                        queue.add(track.getInfo().uri);
+                    }
+                }
+
+                for (AudioTrack track: playList.getTracks()) {
                     musicManager.scheduler.queue(track);
                 }
             }
 
             @Override
-            public void noMatches() {
-            }
+            public void noMatches() {}
 
             @Override
-            public void loadFailed(FriendlyException exception) {
-            }
+            public void loadFailed(FriendlyException exception) {}
         });
     }
 }

@@ -11,35 +11,39 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class TrackScheduler extends AudioEventAdapter {
 
-    private final AudioPlayer player;
-    private final BlockingQueue<AudioTrack> queue;
+    private static AudioPlayer player;
+    private static BlockingQueue<AudioTrack> queue;
     AudioTrack lastTrack;
 
     public TrackScheduler(AudioPlayer player) {
-        this.player = player;
-        this.queue = new LinkedBlockingQueue<>();
+        TrackScheduler.player = player;
+        queue = new LinkedBlockingQueue<>();
     }
 
     public void queue(AudioTrack track) {
-        if (!player.startTrack(track, true)) {
-            queue.offer(track);
-        }
+        if (!player.startTrack(track, true)) queue.offer(track);
     }
 
     public void nextTrack() {
-       player.startTrack(queue.poll(), false);
+        player.startTrack(queue.poll(), false);
+    }
+
+    public static void skipTrack() {
+        player.setPaused(true);
     }
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         this.lastTrack = track;
-        if (endReason.mayStartNext) {
-            if (queue.size() == 0 || lastTrack == queue.toArray()[queue.size() - 1]) MusicPlayer.loadPlaylist(MusicPlayer.type.getUrl());
-            else nextTrack();
-        }
+        if (queue.isEmpty() || lastTrack == queue.toArray()[queue.size() - 1]) MusicPlayer.loopQueue();
+        else nextTrack();
     }
 
-    public void startAnotherPlaylist() {
-        this.queue.clear();
+    public void clearQueue() {
+        queue.clear();
+    }
+
+    public static AudioTrack getPlayingTrack() {
+        return player.getPlayingTrack();
     }
 }

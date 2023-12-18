@@ -1,27 +1,23 @@
 package ml.spmc.musicbot;
 
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import ml.spmc.musicbot.music.MusicPlayer;
 import ml.spmc.musicbot.music.MusicType;
+import ml.spmc.musicbot.music.TrackScheduler;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
-import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
-import net.dv8tion.jda.api.interactions.modals.Modal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.time.Instant;
+import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -30,62 +26,85 @@ import java.util.stream.Stream;
 
 public class EventHandler extends ListenerAdapter {
 
+    private static boolean isValidURL(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            url.toURI();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     @Override
     public void onGuildReady(@Nullable GuildReadyEvent e) {
         assert e != null;
         e.getGuild().updateCommands().addCommands(
-                Commands.slash("musicselection", "Select the type of music you want to listen!")
-                        .addOption(OptionType.STRING, "type", "Type of music.", true, true)
-        ).queue();
-    }
-
-    @Override
-    public void onReady(@NotNull ReadyEvent e) {
-        MusicBot.bot.updateCommands().addCommands(
-                Commands.slash("appeal", "Appeal?")
-        ).queue();
+                Commands.slash("play", "Queue a song you want to listen! It can be from YouTube or SoundCloud (Playlist works too)!")
+                        .addOption(OptionType.STRING, "url", "URL of songs or the bot's collection of music.", true, true)
+                        .addOption(OptionType.BOOLEAN, "extend", "Are you extending the queue?", true, false),
+                Commands.slash("nowplaying", "Check what song is playing!"),
+                Commands.slash("skip", "Skip the song playing.")
+                ).queue();
     }
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent e) {
         switch (e.getName()) {
-            case "musicselection" -> {
-                String string = Objects.requireNonNull(e.getOption("type")).getAsString();
+            case "play" -> {
+                String string = Objects.requireNonNull(e.getOption("url")).getAsString();
+                boolean bool = Objects.requireNonNull(e.getOption("extend")).getAsBoolean();
                 for (MusicType type: MusicType.values()) {
                     if (string.equals(type.name().toLowerCase()) || string.equals(type.name().toUpperCase())) {
-                        MusicPlayer.type = type;
-                        MusicPlayer.stopAndPlayNewList(type.getUrl());
-                        e.reply("Changing to " + string + " type.").queue();
+                        if (!bool) MusicPlayer.stopAndPlay(type.getUrl());
+                        else MusicPlayer.play(type.getUrl(), true);
+                        e.reply("Now playing the bot's tracks.").queue();
+                        break;
                     }
                 }
+
+                if (isValidURL(string)) {
+                    if (!bool) MusicPlayer.stopAndPlay(string);
+                    else MusicPlayer.play(string, true);
+                    e.reply("Now playing the external tracks.").queue();
+                }
             }
-            case "appeal" -> {
-                TextInput menu = TextInput.create("from", "From", TextInputStyle.SHORT)
-                        .setPlaceholder("Where were you warned / kicked / banned. (Minecraft/Discord...)")
-                        .build();
-                TextInput subject = TextInput.create("subject", "Title", TextInputStyle.SHORT)
-                        .setPlaceholder("The reason you're warned / etc.")
-                        .setMinLength(10)
-                        .setMaxLength(100)
-                        .build();
-                TextInput body = TextInput.create("body", "Reason", TextInputStyle.PARAGRAPH)
-                        .setPlaceholder("Reason for unmute / kick / ban?")
-                        .setMinLength(30)
-                        .setMaxLength(1000)
-                        .build();
-                Modal modal = Modal.create("appeal", "Appeal")
-                        .addActionRow(ActionRow.of(menu).getComponents())
-                        .addActionRow(ActionRow.of(subject).getComponents())
-                        .addActionRow(ActionRow.of(body).getComponents())
-                        .build();
-                e.replyModal(modal).queue();
+            case "nowplaying" -> {
+                EmbedBuilder embedBuilder = getEmbedBuilder();
+
+                e.replyEmbeds(embedBuilder.build()).queue();
+            }
+            case "skip" -> {
+                TrackScheduler.skipTrack();
+                e.reply("Skipped track.").queue();
             }
         }
     }
 
+    @NotNull
+    private static EmbedBuilder getEmbedBuilder() {
+        AudioTrack playingTrack = TrackScheduler.getPlayingTrack();
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle(playingTrack.getInfo().title + " - " + playingTrack.getInfo().author, playingTrack.getInfo().uri);
+        embedBuilder.setDescription(getDuration(Duration.ofMillis(playingTrack.getPosition())) + " - " + getDuration(Duration.ofMillis(playingTrack.getDuration())));
+        embedBuilder.setColor(new Color(2600572));
+        embedBuilder.setAuthor("Provided by TCFPlayz", "https://dc.spmc.tk", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
+        return embedBuilder;
+    }
+
+    @NotNull
+    private static String getDuration(Duration d) {
+        String m = String.valueOf(d.toMinutesPart());
+        String s = String.valueOf(d.toSecondsPart());
+
+        if (Integer.parseInt(m) < 10) m = "0" + m;
+        if (Integer.parseInt(s) < 10) s = "0" + s;
+        return m + ":" + s;
+    }
+
     @Override
     public void onCommandAutoCompleteInteraction(CommandAutoCompleteInteractionEvent event) {
-        if (event.getName().equals("musicselection") && event.getFocusedOption().getName().equals("type")) {
+        if (event.getName().equals("play") && event.getFocusedOption().getName().equals("url")) {
             ArrayList<String> string = new ArrayList<>();
             for (MusicType type : MusicType.values()) {
                 string.add(type.name().toLowerCase());
@@ -101,30 +120,6 @@ public class EventHandler extends ListenerAdapter {
             } catch (ClassCastException e) {
                 System.err.println(e.getMessage());
             }
-        }
-    }
-
-    @Override
-    public void onModalInteraction(@NotNull ModalInteractionEvent e) {
-        if ("appeal".equals(e.getModalId())) {
-            String subject = Objects.requireNonNull(e.getValue("subject")).getAsString();
-            String body = Objects.requireNonNull(e.getValue("body")).getAsString();
-            String from = Objects.requireNonNull(e.getValue("from")).getAsString();
-
-            EmbedBuilder eb = new EmbedBuilder();
-            eb.setAuthor(e.getUser().getName(), e.getUser().getEffectiveAvatarUrl());
-            eb.setTitle(subject);
-            eb.setColor(new Color(155, 160, 81));
-            eb.addField("Warned From", from, false);
-            eb.addField("Reason of Appeal", body, false);
-            eb.setFooter("Provided by NCCBot.", "https://github.com/tcfplayz/images/blob/main/ncc.png?raw=true");
-            eb.setTimestamp(Instant.now());
-
-            TextChannel channel2 = MusicBot.bot.getTextChannelById(965803265235226634L);
-            if (channel2 == null) return;
-            channel2.sendMessageEmbeds(eb.build()).queue();
-
-            e.reply("Thanks for your appeal request!").setEphemeral(true).queue();
         }
     }
 }
