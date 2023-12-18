@@ -29,7 +29,7 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     public static void skipTrack() {
-        player.setPaused(true);
+        player.stopTrack();
     }
 
     @Override
