@@ -40,13 +40,13 @@ public class MusicPlayer {
         }
         if (player.isPaused()) player.setPaused(false);
         if (player.getVolume() == 0) player.setVolume(50);
-        play(MusicType.SMP.getUrl(), false);
+        play(MusicType.SMP.getUrl());
     }
 
     public static void loopQueue() {
         Collections.shuffle(queue);
         for (String queue: queue) {
-            play(queue, true);
+            play(queue);
         }
     }
 
@@ -54,26 +54,21 @@ public class MusicPlayer {
         queue.clear();
         musicManager.scheduler.clearQueue();
         player.stopTrack();
-        play(url, false);
+        play(url);
     }
 
-    public static void play(String url, boolean repeat) {
+    public static void play(String url) {
         manager.loadItem(url, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                if (!repeat) queue.add(track.getInfo().uri);
+                queue.add(track.getInfo().uri);
                 musicManager.scheduler.queue(track);
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist playList) {
-                if (!repeat) {
-                    for (AudioTrack track: playList.getTracks()) {
-                        queue.add(track.getInfo().uri);
-                    }
-                }
-
                 for (AudioTrack track: playList.getTracks()) {
+                    queue.add(track.getInfo().uri);
                     musicManager.scheduler.queue(track);
                 }
             }

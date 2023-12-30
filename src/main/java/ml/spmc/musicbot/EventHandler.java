@@ -5,6 +5,7 @@ import ml.spmc.musicbot.music.MusicPlayer;
 import ml.spmc.musicbot.music.MusicType;
 import ml.spmc.musicbot.music.TrackScheduler;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -52,28 +53,28 @@ public class EventHandler extends ListenerAdapter {
     public void onSlashCommandInteraction(SlashCommandInteractionEvent e) {
         switch (e.getName()) {
             case "play" -> {
-                String string = Objects.requireNonNull(e.getOption("url")).getAsString();
-                boolean bool = Objects.requireNonNull(e.getOption("extend")).getAsBoolean();
+                String url = Objects.requireNonNull(e.getOption("url")).getAsString();
+                boolean extend = Objects.requireNonNull(e.getOption("extend")).getAsBoolean();
                 for (MusicType type: MusicType.values()) {
-                    if (string.equals(type.name().toLowerCase()) || string.equals(type.name().toUpperCase())) {
-                        if (!bool) MusicPlayer.stopAndPlay(type.getUrl());
-                        else MusicPlayer.play(type.getUrl(), true);
+                    if (url.equals(type.name().toLowerCase()) || url.equals(type.name().toUpperCase())) {
+                        if (!extend) MusicPlayer.stopAndPlay(type.getUrl());
+                        else MusicPlayer.play(type.getUrl());
                         e.reply("Now playing the bot's tracks.").queue();
                         break;
                     }
                 }
 
-                if (isValidURL(string)) {
-                    if (!bool) MusicPlayer.stopAndPlay(string);
-                    else MusicPlayer.play(string, true);
+                if (isValidURL(url)) {
+                    if (!extend) MusicPlayer.stopAndPlay(url);
+                    else MusicPlayer.play(url);
                     e.reply("Now playing the external tracks.").queue();
+                } else {
+                    if (!extend) MusicPlayer.stopAndPlay(url);
+                    else MusicPlayer.play("ytsearch:" + url);
+                    e.reply("Now playing the searched tracks.").queue();
                 }
             }
-            case "nowplaying" -> {
-                EmbedBuilder embedBuilder = getEmbedBuilder();
-
-                e.replyEmbeds(embedBuilder.build()).queue();
-            }
+            case "nowplaying" -> e.replyEmbeds(getEmbed()).queue();
             case "skip" -> {
                 TrackScheduler.skipTrack();
                 e.reply("Skipped track.").queue();
@@ -82,14 +83,14 @@ public class EventHandler extends ListenerAdapter {
     }
 
     @NotNull
-    private static EmbedBuilder getEmbedBuilder() {
+    private static MessageEmbed getEmbed() {
         AudioTrack playingTrack = TrackScheduler.getPlayingTrack();
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle(playingTrack.getInfo().title + " - " + playingTrack.getInfo().author, playingTrack.getInfo().uri);
         embedBuilder.setDescription(getDuration(Duration.ofMillis(playingTrack.getPosition())) + " - " + getDuration(Duration.ofMillis(playingTrack.getDuration())));
         embedBuilder.setColor(new Color(2600572));
         embedBuilder.setAuthor("Provided by TCFPlayz", "https://dc.spmc.tk", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
-        return embedBuilder;
+        return embedBuilder.build();
     }
 
     @NotNull
