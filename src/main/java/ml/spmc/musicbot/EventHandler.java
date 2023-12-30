@@ -64,15 +64,11 @@ public class EventHandler extends ListenerAdapter {
                     }
                 }
 
-                if (isValidURL(url)) {
-                    if (!extend) MusicPlayer.stopAndPlay(url);
-                    else MusicPlayer.play(url);
-                    e.reply("Now playing the external tracks.").queue();
-                } else {
-                    if (!extend) MusicPlayer.stopAndPlay(url);
-                    else MusicPlayer.play("ytsearch:" + url);
-                    e.reply("Now playing the searched tracks.").queue();
-                }
+                url = isValidURL(url) ? url : "ytsearch:" + url;
+                if (extend) MusicPlayer.play(url);
+                else MusicPlayer.stopAndPlay(url);
+
+                e.reply("Now playing the external tracks.").queue();
             }
             case "nowplaying" -> e.replyEmbeds(getEmbed()).queue();
             case "skip" -> {

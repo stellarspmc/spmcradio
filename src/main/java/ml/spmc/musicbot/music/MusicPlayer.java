@@ -58,7 +58,7 @@ public class MusicPlayer {
     }
 
     public static void play(String url) {
-        manager.loadItem(url, new AudioLoadResultHandler() {
+        manager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
                 queue.add(track.getInfo().uri);
@@ -74,10 +74,14 @@ public class MusicPlayer {
             }
 
             @Override
-            public void noMatches() {}
+            public void noMatches() {
+                System.out.println("No matches");
+            }
 
             @Override
-            public void loadFailed(FriendlyException exception) {}
+            public void loadFailed(FriendlyException exception) {
+                exception.printStackTrace();
+            }
         });
     }
 }
