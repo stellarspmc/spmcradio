@@ -97,7 +97,7 @@ public class EventHandler extends ListenerAdapter {
         embedBuilder.setAuthor("Provided by TCFPlayz", "https://dc.spmc.tk", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
         embedBuilder.setTitle("Queue List");
 
-        ArrayList<AudioTrack> array = TrackScheduler.getQueue();
+        AudioTrack[] array = TrackScheduler.getQueue();
         StringBuilder string = new StringBuilder();
         int count = 0;
 
@@ -123,7 +123,8 @@ public class EventHandler extends ListenerAdapter {
         if (Integer.parseInt(m) < 10) m = "0" + m;
         if (Integer.parseInt(s) < 10) s = "0" + s;
         if (Integer.parseInt(h) < 10) h = "0" + h;
-        return h + ":" + m + ":" + s;
+        if (Integer.parseInt(h) == 0) return m + ":" + s;
+        else return h + ":" + m + ":" + s;
     }
 
     @Override
