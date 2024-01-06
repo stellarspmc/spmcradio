@@ -42,10 +42,11 @@ public class EventHandler extends ListenerAdapter {
         assert e != null;
         e.getGuild().updateCommands().addCommands(
                 Commands.slash("play", "Queue a song you want to listen! It can be from YouTube or SoundCloud (Playlist works too)!")
-                        .addOption(OptionType.STRING, "url", "URL of songs or the bot's collection of music.", true, true)
+                        .addOption(OptionType.STRING, "song", "The song you want to search or the bot's collection of music.", true, true)
                         .addOption(OptionType.BOOLEAN, "extend", "Are you extending the queue?", true, false),
                 Commands.slash("nowplaying", "Check what song is playing!"),
-                Commands.slash("skip", "Skip the song playing.")
+                Commands.slash("skip", "Skip the song playing."),
+                Commands.slash("queuelist", "Get the queue list of songs!")
                 ).queue();
     }
 
@@ -53,14 +54,13 @@ public class EventHandler extends ListenerAdapter {
     public void onSlashCommandInteraction(SlashCommandInteractionEvent e) {
         switch (e.getName()) {
             case "play" -> {
-                String url = Objects.requireNonNull(e.getOption("url")).getAsString();
+                String url = Objects.requireNonNull(e.getOption("song")).getAsString();
                 boolean extend = Objects.requireNonNull(e.getOption("extend")).getAsBoolean();
                 for (MusicType type: MusicType.values()) {
                     if (url.equals(type.name().toLowerCase()) || url.equals(type.name().toUpperCase())) {
                         if (!extend) MusicPlayer.stopAndPlay(type.getUrl());
                         else MusicPlayer.play(type.getUrl());
-                        e.reply("Now playing the bot's tracks.").queue();
-                        break;
+                        e.reply("Now playing bot's tracks.").queue();
                     }
                 }
 
@@ -68,18 +68,19 @@ public class EventHandler extends ListenerAdapter {
                 if (extend) MusicPlayer.play(url);
                 else MusicPlayer.stopAndPlay(url);
 
-                e.reply("Now playing the external tracks.").queue();
+                e.reply("Now playing external tracks.").queue();
             }
-            case "nowplaying" -> e.replyEmbeds(getEmbed()).queue();
+            case "nowplaying" -> e.replyEmbeds(getNowPlayingEmbed()).queue();
             case "skip" -> {
                 TrackScheduler.skipTrack();
                 e.reply("Skipped track.").queue();
             }
+            case "queuelist" -> e.replyEmbeds(getQueueListEmbed()).queue();
         }
     }
 
     @NotNull
-    private static MessageEmbed getEmbed() {
+    private static MessageEmbed getNowPlayingEmbed() {
         AudioTrack playingTrack = TrackScheduler.getPlayingTrack();
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle(playingTrack.getInfo().title + " - " + playingTrack.getInfo().author, playingTrack.getInfo().uri);
@@ -90,13 +91,39 @@ public class EventHandler extends ListenerAdapter {
     }
 
     @NotNull
+    private static MessageEmbed getQueueListEmbed() {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setColor(new Color(2600572));
+        embedBuilder.setAuthor("Provided by TCFPlayz", "https://dc.spmc.tk", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
+        embedBuilder.setTitle("Queue List");
+
+        ArrayList<AudioTrack> array = TrackScheduler.getQueue();
+        StringBuilder string = new StringBuilder();
+        int count = 0;
+
+        for (AudioTrack track: array) {
+            count += 1;
+            string
+                    .append(count).append(". ").append(track.getInfo().title)
+                    .append(" - ").append(track.getInfo().author)
+                    .append(" (").append(getDuration(Duration.ofMillis(track.getPosition()))).append(" - ").append(getDuration(Duration.ofMillis(track.getDuration())))
+                    .append("\n");
+        }
+
+        embedBuilder.setDescription(string.toString());
+        return embedBuilder.build();
+    }
+
+    @NotNull
     private static String getDuration(Duration d) {
         String m = String.valueOf(d.toMinutesPart());
         String s = String.valueOf(d.toSecondsPart());
+        String h = String.valueOf(d.toHoursPart());
 
         if (Integer.parseInt(m) < 10) m = "0" + m;
         if (Integer.parseInt(s) < 10) s = "0" + s;
-        return m + ":" + s;
+        if (Integer.parseInt(h) < 10) h = "0" + h;
+        return h + ":" + m + ":" + s;
     }
 
     @Override

@@ -67,20 +67,23 @@ public class MusicPlayer {
 
             @Override
             public void playlistLoaded(AudioPlaylist playList) {
-                for (AudioTrack track: playList.getTracks()) {
-                    queue.add(track.getInfo().uri);
-                    musicManager.scheduler.queue(track);
+                if (url.contains("ytsearch")) {
+                    queue.add(playList.getTracks().get(0).getInfo().uri);
+                    musicManager.scheduler.queue(playList.getTracks().get(0));
+                } else {
+                    for (AudioTrack track: playList.getTracks()) {
+                        queue.add(track.getInfo().uri);
+                        musicManager.scheduler.queue(track);
+                    }
                 }
             }
 
             @Override
             public void noMatches() {
-                System.out.println("No matches");
             }
 
             @Override
             public void loadFailed(FriendlyException exception) {
-                exception.printStackTrace();
             }
         });
     }
