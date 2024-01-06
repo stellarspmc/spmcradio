@@ -48,6 +48,6 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     public static AudioTrack[] getQueue() {
-        return (AudioTrack[]) queue.toArray();
+        return queue.toArray(new AudioTrack[]{});
     }
 }
