@@ -20,6 +20,7 @@ import java.awt.*;
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -97,7 +98,9 @@ public class EventHandler extends ListenerAdapter {
         embedBuilder.setAuthor("Provided by TCFPlayz", "https://dc.spmc.tk", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
         embedBuilder.setTitle("Queue List");
 
-        AudioTrack[] array = TrackScheduler.getQueue();
+        ArrayList<AudioTrack> array = (ArrayList<AudioTrack>) Arrays.asList(TrackScheduler.getQueue());
+        array.add(0, TrackScheduler.getPlayingTrack());
+
         StringBuilder string = new StringBuilder();
         int count = 0;
 
