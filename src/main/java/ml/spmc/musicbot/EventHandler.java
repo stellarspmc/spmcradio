@@ -42,7 +42,7 @@ public class EventHandler extends ListenerAdapter {
     public void onGuildReady(@Nullable GuildReadyEvent e) {
         assert e != null;
         e.getGuild().updateCommands().addCommands(
-                Commands.slash("play", "Queue a song you want to listen! It can be from YouTube or SoundCloud (Playlist works too)!")
+                Commands.slash("play", "Queue a song you want to listen! It can be from YouTube or SoundCloud!")
                         .addOption(OptionType.STRING, "song", "The song you want to search or the bot's collection of music.", true, true)
                         .addOption(OptionType.BOOLEAN, "extend", "Are you extending the queue?", true, false),
                 Commands.slash("nowplaying", "Check what song is playing!"),
@@ -62,6 +62,7 @@ public class EventHandler extends ListenerAdapter {
                         if (!extend) MusicPlayer.stopAndPlay(type.getUrl());
                         else MusicPlayer.play(type.getUrl());
                         e.reply("Now playing bot's tracks.").queue();
+                        break;
                     }
                 }
 
