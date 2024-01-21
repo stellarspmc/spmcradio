@@ -62,7 +62,7 @@ public class EventHandler extends ListenerAdapter {
                         if (!extend) MusicPlayer.stopAndPlay(type.getUrl());
                         else MusicPlayer.play(type.getUrl());
                         e.reply("Now playing bot's tracks.").queue();
-                        break;
+                        return;
                     }
                 }
 
