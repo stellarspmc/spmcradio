@@ -127,6 +127,7 @@ public class EventHandler extends ListenerAdapter {
         StringBuilder string = new StringBuilder();
         int count = 0;
         long dur = 0;
+        long pos = 0;
 
         for (AudioTrack track: array) {
             count += 1;
@@ -141,11 +142,17 @@ public class EventHandler extends ListenerAdapter {
                     .append(" (").append(getDuration(Duration.ofMillis(track.getPosition()))).append(" - ").append(getDuration(Duration.ofMillis(track.getDuration())))
                     .append(")\n");
             dur += track.getDuration();
+            pos += track.getPosition();
         }
 
         string
                 .append("\nIn total, you have ")
                 .append(getDuration(Duration.ofMillis(dur)))
+                .append(" of music,");
+
+        string
+                .append("\nwhile you have listened to ")
+                .append(getDuration(Duration.ofMillis(pos)))
                 .append(" of music.");
         embedBuilder.setDescription(string.toString());
         return embedBuilder.build();
