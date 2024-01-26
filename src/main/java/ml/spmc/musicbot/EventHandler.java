@@ -20,7 +20,6 @@ import java.awt.*;
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -42,12 +41,16 @@ public class EventHandler extends ListenerAdapter {
     public void onGuildReady(@Nullable GuildReadyEvent e) {
         assert e != null;
         e.getGuild().updateCommands().addCommands(
-                Commands.slash("play", "Queue a song you want to listen! It can be from YouTube or SoundCloud!")
-                        .addOption(OptionType.STRING, "song", "The song you want to search or the bot's collection of music.", true, true)
-                        .addOption(OptionType.BOOLEAN, "extend", "Are you extending the queue?", true, false),
+                Commands.slash("play", "Play a song you want to listen! It can be from YouTube or SoundCloud!")
+                        .addOption(OptionType.STRING, "song", "The song you want to play.", true, true)
+                        .addOption(OptionType.BOOLEAN, "shuffle", "Do you want to shuffle it?", true, false),
+                Commands.slash("queue", "Queue a song you want to listen! It can be from YouTube or SoundCloud!")
+                        .addOption(OptionType.STRING, "song", "The song you want to queue.", true, true),
                 Commands.slash("nowplaying", "Check what song is playing!"),
                 Commands.slash("skip", "Skip the song playing."),
-                Commands.slash("queuelist", "Get the queue list of songs!")
+                Commands.slash("queuelist", "Get the queue list of songs!"),
+                Commands.slash("volume", "Only for owner cuz scared of abusing")
+                        .addOption(OptionType.INTEGER, "volume", "Volume", true, false)
                 ).queue();
     }
 
@@ -56,21 +59,34 @@ public class EventHandler extends ListenerAdapter {
         switch (e.getName()) {
             case "play" -> {
                 String url = Objects.requireNonNull(e.getOption("song")).getAsString();
-                boolean extend = Objects.requireNonNull(e.getOption("extend")).getAsBoolean();
+                boolean shuffle = Objects.requireNonNull(e.getOption("shuffle")).getAsBoolean();
                 for (MusicType type: MusicType.values()) {
                     if (url.equals(type.name().toLowerCase()) || url.equals(type.name().toUpperCase())) {
-                        if (!extend) MusicPlayer.stopAndPlay(type.getUrl());
-                        else MusicPlayer.play(type.getUrl());
+                        MusicPlayer.stopAndPlay(type.getUrl(), shuffle);
                         e.reply("Now playing bot's tracks.").queue();
                         return;
                     }
                 }
 
                 url = isValidURL(url) ? url : "ytsearch:" + url;
-                if (extend) MusicPlayer.play(url);
-                else MusicPlayer.stopAndPlay(url);
+                MusicPlayer.stopAndPlay(url, shuffle);
 
                 e.reply("Now playing external tracks.").queue();
+            }
+            case "queue" -> {
+                String url = Objects.requireNonNull(e.getOption("song")).getAsString();
+                for (MusicType type: MusicType.values()) {
+                    if (url.equals(type.name().toLowerCase()) || url.equals(type.name().toUpperCase())) {
+                        MusicPlayer.play(type.getUrl(), false, false);
+                        e.reply("Now queuing bot's tracks.").queue();
+                        return;
+                    }
+                }
+
+                url = isValidURL(url) ? url : "ytsearch:" + url;
+                MusicPlayer.play(url, false, false);
+
+                e.reply("Now queuing external tracks.").queue();
             }
             case "nowplaying" -> e.replyEmbeds(getNowPlayingEmbed()).queue();
             case "skip" -> {
@@ -78,6 +94,13 @@ public class EventHandler extends ListenerAdapter {
                 e.reply("Skipped track.").queue();
             }
             case "queuelist" -> e.replyEmbeds(getQueueListEmbed()).queue();
+            case "volume" -> {
+                int volume = Objects.requireNonNull(e.getOption("volume")).getAsInt();
+                if (volume > 100 || volume < 0) e.reply("No").queue();
+                if (!Objects.requireNonNull(e.getMember()).getUser().getId().equals("340022376924446720" /* change to your id and compile it or ditch the feature */)) e.reply("No").queue();
+                TrackScheduler.setVolume(volume);
+                e.reply("Done.").queue();
+            }
         }
     }
 
@@ -99,21 +122,32 @@ public class EventHandler extends ListenerAdapter {
         embedBuilder.setAuthor("Provided by TCFPlayz", "https://dc.spmc.tk", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
         embedBuilder.setTitle("Queue List");
 
-        ArrayList<AudioTrack> array = new ArrayList<>(Arrays.asList(TrackScheduler.getQueue()));
-        array.add(0, TrackScheduler.getPlayingTrack());
+        ArrayList<AudioTrack> array = MusicPlayer.trackQueue;
 
         StringBuilder string = new StringBuilder();
-        int count = 0;
+        int count = -1;
+        long dur = 0;
 
         for (AudioTrack track: array) {
             count += 1;
+            if (track.equals(TrackScheduler.getPlayingTrack())) string
+                        .append("→ ").append(count).append(". ").append(track.getInfo().title)
+                        .append(" - ").append(track.getInfo().author)
+                        .append(" (").append(getDuration(Duration.ofMillis(track.getPosition()))).append(" - ").append(getDuration(Duration.ofMillis(track.getDuration())))
+                        .append(")\n");
+
             string
                     .append(count).append(". ").append(track.getInfo().title)
                     .append(" - ").append(track.getInfo().author)
                     .append(" (").append(getDuration(Duration.ofMillis(track.getPosition()))).append(" - ").append(getDuration(Duration.ofMillis(track.getDuration())))
                     .append(")\n");
+            dur += track.getDuration();
         }
 
+        string
+                .append("\nIn total, you have ")
+                .append(getDuration(Duration.ofMillis(dur)))
+                .append(" of music.");
         embedBuilder.setDescription(string.toString());
         return embedBuilder.build();
     }
@@ -133,7 +167,7 @@ public class EventHandler extends ListenerAdapter {
 
     @Override
     public void onCommandAutoCompleteInteraction(CommandAutoCompleteInteractionEvent event) {
-        if (event.getName().equals("play") && event.getFocusedOption().getName().equals("song")) {
+        if ((event.getName().equals("play") || event.getName().equals("queue")) && event.getFocusedOption().getName().equals("song")) {
             ArrayList<String> string = new ArrayList<>();
             for (MusicType type : MusicType.values()) {
                 string.add(type.name().toLowerCase());

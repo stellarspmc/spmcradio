@@ -47,7 +47,7 @@ public class TrackScheduler extends AudioEventAdapter {
         return player.getPlayingTrack();
     }
 
-    public static AudioTrack[] getQueue() {
-        return queue.toArray(AudioTrack[]::new);
+    public static void setVolume(int volume) {
+        player.setVolume(volume);
     }
 }
