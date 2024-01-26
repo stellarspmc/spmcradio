@@ -75,14 +75,14 @@ public class MusicPlayer {
                 List<AudioTrack> tracks = playList.getTracks();
                 if (shuffle) Collections.shuffle(tracks);
                 if (url.contains("ytsearch")) {
-                    if (repeat) {
+                    if (!repeat) {
                         queue.add(playList.getTracks().get(0).getInfo().uri);
                         trackQueue.add(playList.getTracks().get(0));
                     }
                     musicManager.scheduler.queue(playList.getTracks().get(0));
                 } else {
                     for (AudioTrack track: tracks) {
-                        if (repeat) {
+                        if (!repeat) {
                             queue.add(track.getInfo().uri);
                             trackQueue.add(track);
                         }
