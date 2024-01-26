@@ -125,7 +125,7 @@ public class EventHandler extends ListenerAdapter {
         ArrayList<AudioTrack> array = MusicPlayer.trackQueue;
 
         StringBuilder string = new StringBuilder();
-        int count = -1;
+        int count = 0;
         long dur = 0;
 
         for (AudioTrack track: array) {
@@ -135,8 +135,7 @@ public class EventHandler extends ListenerAdapter {
                         .append(" - ").append(track.getInfo().author)
                         .append(" (").append(getDuration(Duration.ofMillis(track.getPosition()))).append(" - ").append(getDuration(Duration.ofMillis(track.getDuration())))
                         .append(")\n");
-
-            string
+            else string
                     .append(count).append(". ").append(track.getInfo().title)
                     .append(" - ").append(track.getInfo().author)
                     .append(" (").append(getDuration(Duration.ofMillis(track.getPosition()))).append(" - ").append(getDuration(Duration.ofMillis(track.getDuration())))
