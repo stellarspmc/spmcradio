@@ -47,6 +47,7 @@ public class MusicPlayer {
 
     public static void loopQueue() {
         for (String queue: queue) {
+            trackQueue.clear();
             play(queue, true, true);
         }
     }
@@ -63,10 +64,8 @@ public class MusicPlayer {
         manager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                if (!repeat) {
-                    queue.add(track.getInfo().uri);
-                    trackQueue.add(track);
-                }
+                if (!repeat) queue.add(track.getInfo().uri);
+                trackQueue.add(track);
                 musicManager.scheduler.queue(track);
             }
 
@@ -75,17 +74,13 @@ public class MusicPlayer {
                 List<AudioTrack> tracks = playList.getTracks();
                 if (shuffle) Collections.shuffle(tracks);
                 if (url.contains("ytsearch")) {
-                    if (!repeat) {
-                        queue.add(playList.getTracks().get(0).getInfo().uri);
-                        trackQueue.add(playList.getTracks().get(0));
-                    }
+                    if (!repeat) queue.add(playList.getTracks().get(0).getInfo().uri);
+                    trackQueue.add(playList.getTracks().get(0));
                     musicManager.scheduler.queue(playList.getTracks().get(0));
                 } else {
                     for (AudioTrack track: tracks) {
-                        if (!repeat) {
-                            queue.add(track.getInfo().uri);
-                            trackQueue.add(track);
-                        }
+                        if (!repeat) queue.add(track.getInfo().uri);
+                        trackQueue.add(track);
                         musicManager.scheduler.queue(track);
                     }
                 }

@@ -25,7 +25,9 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     public void nextTrack() {
-        player.startTrack(queue.poll(), false);
+        AudioTrack track = queue.poll();
+        if (track == null) MusicPlayer.loopQueue();
+        else player.startTrack(track, false);
     }
 
     public static void skipTrack() {
