@@ -5,6 +5,8 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -14,14 +16,27 @@ public class TrackScheduler extends AudioEventAdapter {
     private static AudioPlayer player;
     private static BlockingQueue<AudioTrack> queue;
     AudioTrack lastTrack;
+    public static boolean shuffled = false;
 
     public TrackScheduler(AudioPlayer player) {
         TrackScheduler.player = player;
         queue = new LinkedBlockingQueue<>();
     }
 
-    public void queue(AudioTrack track) {
+    public static void queue(AudioTrack track) {
         if (!player.startTrack(track, true)) queue.offer(track);
+    }
+
+    public static void shuffle() {
+        List<AudioTrack> array = new java.util.ArrayList<>(List.of(queue.toArray(new AudioTrack[]{})));
+
+        clearQueue();
+        Collections.shuffle(array);
+        for (AudioTrack track: array) {
+            queue.offer(track);
+        }
+
+        shuffled = !shuffled;
     }
 
     public void nextTrack() {
@@ -41,7 +56,7 @@ public class TrackScheduler extends AudioEventAdapter {
         else nextTrack();
     }
 
-    public void clearQueue() {
+    public static void clearQueue() {
         queue.clear();
     }
 

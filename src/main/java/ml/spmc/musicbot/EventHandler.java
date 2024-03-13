@@ -5,6 +5,7 @@ import ml.spmc.musicbot.music.MusicPlayer;
 import ml.spmc.musicbot.music.MusicType;
 import ml.spmc.musicbot.music.TrackScheduler;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -42,16 +43,16 @@ public class EventHandler extends ListenerAdapter {
         assert e != null;
         e.getGuild().updateCommands().addCommands(
                 Commands.slash("play", "Play a song you want to listen! It can be from YouTube or SoundCloud!")
-                        .addOption(OptionType.STRING, "song", "The song you want to play.", true, true)
-                        .addOption(OptionType.BOOLEAN, "shuffle", "Do you want to shuffle it?", true, false),
+                        .addOption(OptionType.STRING, "song", "The song you want to play.", true, true),
                 Commands.slash("queue", "Queue a song you want to listen! It can be from YouTube or SoundCloud!")
                         .addOption(OptionType.STRING, "song", "The song you want to queue.", true, true),
                 Commands.slash("nowplaying", "Check what song is playing!"),
                 Commands.slash("skip", "Skip the song playing."),
                 Commands.slash("queuelist", "Get the queue list of songs!"),
                 Commands.slash("volume", "Only for owner cuz scared of abusing")
-                        .addOption(OptionType.INTEGER, "volume", "Volume", true, false)
-                ).queue();
+                        .addOption(OptionType.INTEGER, "volume", "Volume", true, false),
+                Commands.slash("shuffle", "Shuffles the queue!")
+        ).queue();
     }
 
     @Override
@@ -59,17 +60,16 @@ public class EventHandler extends ListenerAdapter {
         switch (e.getName()) {
             case "play" -> {
                 String url = Objects.requireNonNull(e.getOption("song")).getAsString();
-                boolean shuffle = Objects.requireNonNull(e.getOption("shuffle")).getAsBoolean();
                 for (MusicType type: MusicType.values()) {
                     if (url.equals(type.name().toLowerCase()) || url.equals(type.name().toUpperCase())) {
-                        MusicPlayer.stopAndPlay(type.getUrl(), shuffle);
+                        MusicPlayer.stopAndPlay(type.getUrl());
                         e.reply("Now playing bot's tracks.").queue();
                         return;
                     }
                 }
 
                 url = isValidURL(url) ? url : "ytsearch:" + url;
-                MusicPlayer.stopAndPlay(url, shuffle);
+                MusicPlayer.stopAndPlay(url);
 
                 e.reply("Now playing external tracks.").queue();
             }
@@ -77,14 +77,14 @@ public class EventHandler extends ListenerAdapter {
                 String url = Objects.requireNonNull(e.getOption("song")).getAsString();
                 for (MusicType type: MusicType.values()) {
                     if (url.equals(type.name().toLowerCase()) || url.equals(type.name().toUpperCase())) {
-                        MusicPlayer.play(type.getUrl(), false, false);
+                        MusicPlayer.play(type.getUrl());
                         e.reply("Now queuing bot's tracks.").queue();
                         return;
                     }
                 }
 
                 url = isValidURL(url) ? url : "ytsearch:" + url;
-                MusicPlayer.play(url, false, false);
+                MusicPlayer.play(url);
 
                 e.reply("Now queuing external tracks.").queue();
             }
@@ -96,10 +96,14 @@ public class EventHandler extends ListenerAdapter {
             case "queuelist" -> e.replyEmbeds(getQueueListEmbed()).queue();
             case "volume" -> {
                 int volume = Objects.requireNonNull(e.getOption("volume")).getAsInt();
-                if (volume > 100 || volume < 0) e.reply("No").queue();
-                if (!Objects.requireNonNull(e.getMember()).getUser().getId().equals("340022376924446720" /* change to your id and compile it or ditch the feature */)) e.reply("No").queue();
+                if (volume > 100 || volume < 0) e.deferReply().queue();
+                if (!Objects.requireNonNull(e.getMember()).hasPermission(Permission.ADMINISTRATOR)) e.deferReply().queue();
                 TrackScheduler.setVolume(volume);
-                e.reply("Done.").queue();
+                e.reply("Changed volume to " + volume + "%.").queue();
+            }
+            case "shuffle" -> {
+                TrackScheduler.shuffle();
+                e.reply("Shuffled queue!").queue();
             }
         }
     }

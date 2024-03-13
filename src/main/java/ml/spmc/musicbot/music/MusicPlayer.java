@@ -42,29 +42,31 @@ public class MusicPlayer {
         }
         if (player.isPaused()) player.setPaused(false);
         if (player.getVolume() == 0) player.setVolume(50);
-        play(MusicType.SMP.getUrl(), true, false);
+        play(MusicType.SMP.getUrl());
     }
 
     public static void loopQueue() {
+        if (TrackScheduler.shuffled) Collections.shuffle(queue);
         for (String queue: queue) {
             trackQueue.clear();
-            play(queue, true, true);
+            play(queue);
         }
     }
 
-    public static void stopAndPlay(String url, boolean shuffle) {
+    public static void stopAndPlay(String url) {
         queue.clear();
         trackQueue.clear();
-        musicManager.scheduler.clearQueue();
+        TrackScheduler.clearQueue();
         player.stopTrack();
-        play(url, shuffle, false);
+
+        TrackScheduler.shuffled = false;
+        play(url);
     }
 
-    public static void play(String url, boolean shuffle, boolean repeat) {
+    public static void play(String url) {
         manager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                if (!repeat) queue.add(track.getInfo().uri);
                 trackQueue.add(track);
                 musicManager.scheduler.queue(track);
             }
@@ -72,14 +74,11 @@ public class MusicPlayer {
             @Override
             public void playlistLoaded(AudioPlaylist playList) {
                 List<AudioTrack> tracks = playList.getTracks();
-                if (shuffle) Collections.shuffle(tracks);
                 if (url.contains("ytsearch")) {
-                    if (!repeat) queue.add(playList.getTracks().get(0).getInfo().uri);
                     trackQueue.add(playList.getTracks().get(0));
                     musicManager.scheduler.queue(playList.getTracks().get(0));
                 } else {
                     for (AudioTrack track: tracks) {
-                        if (!repeat) queue.add(track.getInfo().uri);
                         trackQueue.add(track);
                         musicManager.scheduler.queue(track);
                     }
