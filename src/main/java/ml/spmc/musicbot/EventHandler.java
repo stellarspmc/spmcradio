@@ -126,7 +126,7 @@ public class EventHandler extends ListenerAdapter {
         embedBuilder.setAuthor("Provided by TCFPlayz", "https://dc.spmc.tk", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
         embedBuilder.setTitle("Queue List");
 
-        ArrayList<AudioTrack> array = MusicPlayer.trackQueue;
+        AudioTrack[] array = MusicPlayer.getMusicManager().scheduler.getTrackQueue();
 
         StringBuilder string = new StringBuilder();
         int count = 0;

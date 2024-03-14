@@ -22,6 +22,11 @@ import static ml.spmc.musicbot.MusicBot.bot;
 public class MusicPlayer {
 
     private static final AudioPlayerManager manager = new DefaultAudioPlayerManager();
+
+    public static MusicManager getMusicManager() {
+        return musicManager;
+    }
+
     private static final MusicManager musicManager = new MusicManager(manager);
     private static final Guild guild = bot.getGuildById(Config.GUILD_ID);
     private static final AudioPlayer player = musicManager.player;
@@ -49,14 +54,14 @@ public class MusicPlayer {
         if (TrackScheduler.shuffled) Collections.shuffle(queue);
         for (String queue: queue) {
             trackQueue.clear();
-            play(queue);
+            loopedPlay(queue);
         }
     }
 
     public static void stopAndPlay(String url) {
         queue.clear();
         trackQueue.clear();
-        TrackScheduler.clearQueue();
+        musicManager.scheduler.clearQueue();
         player.stopTrack();
 
         TrackScheduler.shuffled = false;
@@ -80,6 +85,34 @@ public class MusicPlayer {
                 } else {
                     for (AudioTrack track: tracks) {
                         trackQueue.add(track);
+                        musicManager.scheduler.queue(track);
+                    }
+                }
+            }
+
+            @Override
+            public void noMatches() {
+            }
+
+            @Override
+            public void loadFailed(FriendlyException exception) {
+            }
+        });
+    }
+
+    private static void loopedPlay(String url) {
+        manager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
+            @Override
+            public void trackLoaded(AudioTrack track) {
+                musicManager.scheduler.queue(track);
+            }
+
+            @Override
+            public void playlistLoaded(AudioPlaylist playList) {
+                List<AudioTrack> tracks = playList.getTracks();
+                if (url.contains("ytsearch")) musicManager.scheduler.queue(playList.getTracks().get(0));
+                else {
+                    for (AudioTrack track: tracks) {
                         musicManager.scheduler.queue(track);
                     }
                 }
