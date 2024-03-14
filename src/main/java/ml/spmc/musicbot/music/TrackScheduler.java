@@ -7,7 +7,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -16,6 +15,7 @@ public class TrackScheduler extends AudioEventAdapter {
 
     private static AudioPlayer player;
     private static BlockingQueue<AudioTrack> queue;
+    public static ArrayList<AudioTrack> arrayQueue;
     AudioTrack lastTrack;
     public static boolean shuffled = false;
 
@@ -25,15 +25,16 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     public void queue(AudioTrack track) {
-        if (!player.startTrack(track, true)) queue.offer(track);
+        if (!player.startTrack(track, true)) {
+            queue.offer(track);
+            arrayQueue.add(track);
+        }
     }
 
     public static void shuffle() {
-        List<AudioTrack> array = new java.util.ArrayList<>(List.of(queue.toArray(new AudioTrack[]{})));
-
         queue.clear();
-        Collections.shuffle(array);
-        for (AudioTrack track: array) {
+        Collections.shuffle(arrayQueue);
+        for (AudioTrack track: arrayQueue) {
             queue.offer(track);
         }
 
@@ -46,10 +47,6 @@ public class TrackScheduler extends AudioEventAdapter {
         else player.startTrack(track, false);
     }
 
-    public AudioTrack[] getTrackQueue() {
-        return queue.toArray(new AudioTrack[0]);
-    }
-
     public static void skipTrack() {
         player.stopTrack();
     }
@@ -57,12 +54,12 @@ public class TrackScheduler extends AudioEventAdapter {
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         this.lastTrack = track;
-        if (queue.isEmpty() || lastTrack == queue.toArray()[queue.size() - 1]) MusicPlayer.loopQueue();
-        else nextTrack();
+        nextTrack();
     }
 
     public void clearQueue() {
         queue.clear();
+        arrayQueue.clear();
     }
 
     public static AudioTrack getPlayingTrack() {

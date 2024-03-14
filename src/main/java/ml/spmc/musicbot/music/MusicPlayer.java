@@ -23,15 +23,9 @@ public class MusicPlayer {
 
     private static final AudioPlayerManager manager = new DefaultAudioPlayerManager();
 
-    public static MusicManager getMusicManager() {
-        return musicManager;
-    }
-
     private static final MusicManager musicManager = new MusicManager(manager);
     private static final Guild guild = bot.getGuildById(Config.GUILD_ID);
     private static final AudioPlayer player = musicManager.player;
-    private static final ArrayList<String> queue = new ArrayList<>();
-    public static final ArrayList<AudioTrack> trackQueue = new ArrayList<>();
 
     public static void playMusic() {
         VoiceChannel channel = bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID);
@@ -49,20 +43,18 @@ public class MusicPlayer {
         if (player.getVolume() == 0) player.setVolume(50);
         play(MusicType.SMP.getUrl());
         TrackScheduler.shuffle();
-        TrackScheduler.skipTrack();
     }
 
     public static void loopQueue() {
+        ArrayList<AudioTrack> queue = TrackScheduler.arrayQueue;
         if (TrackScheduler.shuffled) Collections.shuffle(queue);
-        for (String queue: queue) {
-            trackQueue.clear();
-            loopedPlay(queue);
+        TrackScheduler.arrayQueue.clear();
+        for (AudioTrack track: queue) {
+            musicManager.scheduler.queue(track);
         }
     }
 
     public static void stopAndPlay(String url) {
-        queue.clear();
-        trackQueue.clear();
         musicManager.scheduler.clearQueue();
         player.stopTrack();
 
@@ -74,45 +66,14 @@ public class MusicPlayer {
         manager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                trackQueue.add(track);
                 musicManager.scheduler.queue(track);
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist playList) {
                 List<AudioTrack> tracks = playList.getTracks();
-                if (url.contains("ytsearch")) {
-                    trackQueue.add(playList.getTracks().get(0));
+                if (url.contains("ytsearch"))
                     musicManager.scheduler.queue(playList.getTracks().get(0));
-                } else {
-                    for (AudioTrack track: tracks) {
-                        trackQueue.add(track);
-                        musicManager.scheduler.queue(track);
-                    }
-                }
-            }
-
-            @Override
-            public void noMatches() {
-            }
-
-            @Override
-            public void loadFailed(FriendlyException exception) {
-            }
-        });
-    }
-
-    private static void loopedPlay(String url) {
-        manager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
-            @Override
-            public void trackLoaded(AudioTrack track) {
-                musicManager.scheduler.queue(track);
-            }
-
-            @Override
-            public void playlistLoaded(AudioPlaylist playList) {
-                List<AudioTrack> tracks = playList.getTracks();
-                if (url.contains("ytsearch")) musicManager.scheduler.queue(playList.getTracks().get(0));
                 else {
                     for (AudioTrack track: tracks) {
                         musicManager.scheduler.queue(track);

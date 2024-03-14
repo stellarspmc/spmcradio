@@ -126,8 +126,9 @@ public class EventHandler extends ListenerAdapter {
         embedBuilder.setAuthor("Provided by TCFPlayz", "https://dc.spmc.tk", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
         embedBuilder.setTitle("Queue List");
 
-        AudioTrack[] array = MusicPlayer.getMusicManager().scheduler.getTrackQueue();
+        AudioTrack[] array = TrackScheduler.arrayQueue.toArray(new AudioTrack[0]);
 
+        StringBuilder oldString = new StringBuilder();
         StringBuilder string = new StringBuilder();
         int count = 0;
         long dur = 0;
@@ -135,30 +136,29 @@ public class EventHandler extends ListenerAdapter {
 
         for (AudioTrack track: array) {
             count += 1;
-            if (track.equals(TrackScheduler.getPlayingTrack())) string
+            if (track.equals(TrackScheduler.getPlayingTrack())) oldString
                         .append("→ ").append(count).append(". ").append(track.getInfo().title)
                         .append(" - ").append(track.getInfo().author)
                         .append(" (").append(getDuration(Duration.ofMillis(track.getPosition()))).append(" - ").append(getDuration(Duration.ofMillis(track.getDuration())))
                         .append(")\n");
-            else string
+            else oldString
                     .append(count).append(". ").append(track.getInfo().title)
                     .append(" - ").append(track.getInfo().author)
                     .append(" (").append(getDuration(Duration.ofMillis(track.getPosition()))).append(" - ").append(getDuration(Duration.ofMillis(track.getDuration())))
                     .append(")\n");
+            if (oldString.toString().length() + string.toString().length() > 4096) break;
+            string.append(oldString);
+            oldString.setLength(0);
+        }
+
+        for (AudioTrack track: array) {
             dur += track.getDuration();
             pos += track.getPosition();
         }
 
-        string
-                .append("\nIn total, you have ")
-                .append(getDuration(Duration.ofMillis(dur)))
-                .append(" of music,");
-
-        string
-                .append("\nwhile you have listened to ")
-                .append(getDuration(Duration.ofMillis(pos)))
-                .append(" of music.");
         embedBuilder.setDescription(string.toString());
+        embedBuilder.addField("Listened music", getDuration(Duration.ofMillis(pos)), true);
+        embedBuilder.addField("Total music", getDuration(Duration.ofMillis(dur)), true);
         return embedBuilder.build();
     }
 
