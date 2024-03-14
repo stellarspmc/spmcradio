@@ -48,6 +48,8 @@ public class MusicPlayer {
         if (player.isPaused()) player.setPaused(false);
         if (player.getVolume() == 0) player.setVolume(50);
         play(MusicType.SMP.getUrl());
+        TrackScheduler.shuffle();
+        TrackScheduler.skipTrack();
     }
 
     public static void loopQueue() {
