@@ -120,3 +120,4 @@ run/
 remappedSrc/
 build/
 target/
+/config.properties

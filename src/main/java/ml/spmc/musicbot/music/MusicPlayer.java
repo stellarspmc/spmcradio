@@ -46,17 +46,17 @@ public class MusicPlayer {
     }
 
     public static void loopQueue() {
-        ArrayList<AudioTrack> queue = TrackScheduler.arrayQueue;
+        ArrayList<AudioTrack> queue = new ArrayList<>(TrackScheduler.arrayQueue);
         if (TrackScheduler.shuffled) Collections.shuffle(queue);
-        TrackScheduler.arrayQueue.clear();
+        musicManager.scheduler.clearQueue();
         for (AudioTrack track: queue) {
-            musicManager.scheduler.queue(track);
+            play(track.getInfo().uri);
         }
     }
 
     public static void stopAndPlay(String url) {
-        musicManager.scheduler.clearQueue();
         player.stopTrack();
+        musicManager.scheduler.clearQueue();
 
         TrackScheduler.shuffled = false;
         play(url);
@@ -72,8 +72,7 @@ public class MusicPlayer {
             @Override
             public void playlistLoaded(AudioPlaylist playList) {
                 List<AudioTrack> tracks = playList.getTracks();
-                if (url.contains("ytsearch"))
-                    musicManager.scheduler.queue(playList.getTracks().get(0));
+                if (url.contains("ytsearch")) musicManager.scheduler.queue(playList.getTracks().get(0));
                 else {
                     for (AudioTrack track: tracks) {
                         musicManager.scheduler.queue(track);

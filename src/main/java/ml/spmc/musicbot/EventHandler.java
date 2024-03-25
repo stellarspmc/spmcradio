@@ -47,7 +47,6 @@ public class EventHandler extends ListenerAdapter {
                 Commands.slash("queue", "Queue a song you want to listen! It can be from YouTube or SoundCloud!")
                         .addOption(OptionType.STRING, "song", "The song you want to queue.", true, true),
                 Commands.slash("nowplaying", "Check what song is playing!"),
-                Commands.slash("skip", "Skip the song playing."),
                 Commands.slash("queuelist", "Get the queue list of songs!"),
                 Commands.slash("volume", "Only for owner cuz scared of abusing")
                         .addOption(OptionType.INTEGER, "volume", "Volume", true, false),
@@ -89,10 +88,6 @@ public class EventHandler extends ListenerAdapter {
                 e.reply("Now queuing external tracks.").queue();
             }
             case "nowplaying" -> e.replyEmbeds(getNowPlayingEmbed()).queue();
-            case "skip" -> {
-                TrackScheduler.skipTrack();
-                e.reply("Skipped track.").queue();
-            }
             case "queuelist" -> e.replyEmbeds(getQueueListEmbed()).queue();
             case "volume" -> {
                 int volume = Objects.requireNonNull(e.getOption("volume")).getAsInt();

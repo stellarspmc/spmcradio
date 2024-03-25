@@ -6,6 +6,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -22,39 +23,34 @@ public class TrackScheduler extends AudioEventAdapter {
     public TrackScheduler(AudioPlayer player) {
         TrackScheduler.player = player;
         queue = new LinkedBlockingQueue<>();
+        arrayQueue = new ArrayList<>();
     }
 
     public void queue(AudioTrack track) {
-        if (!player.startTrack(track, true)) {
-            queue.offer(track);
-            arrayQueue.add(track);
-        }
+        if (!arrayQueue.isEmpty()) queue.offer(track);
+        player.startTrack(track, true);
+        arrayQueue.add(track);
     }
 
     public static void shuffle() {
+        ArrayList<AudioTrack> array = arrayQueue;
+
         queue.clear();
-        Collections.shuffle(arrayQueue);
-        for (AudioTrack track: arrayQueue) {
+        Collections.shuffle(array);
+        for (AudioTrack track: array) {
             queue.offer(track);
         }
 
         shuffled = !shuffled;
-    }
-
-    public void nextTrack() {
-        AudioTrack track = queue.poll();
-        if (track == null) MusicPlayer.loopQueue();
-        else player.startTrack(track, false);
-    }
-
-    public static void skipTrack() {
-        player.stopTrack();
+        arrayQueue = array;
     }
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         this.lastTrack = track;
-        nextTrack();
+        AudioTrack track2 = queue.poll();
+        boolean bool = player.startTrack(track2, false);
+        if (!bool) MusicPlayer.loopQueue();
     }
 
     public void clearQueue() {
