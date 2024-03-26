@@ -55,8 +55,8 @@ public class MusicPlayer {
     }
 
     public static void stopAndPlay(String url) {
-        player.stopTrack();
         musicManager.scheduler.clearQueue();
+        player.stopTrack();
 
         TrackScheduler.shuffled = false;
         play(url);

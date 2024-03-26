@@ -65,4 +65,8 @@ public class TrackScheduler extends AudioEventAdapter {
     public static void setVolume(int volume) {
         player.setVolume(volume);
     }
+
+    public static void skipTrack() {
+        player.stopTrack();
+    }
 }
