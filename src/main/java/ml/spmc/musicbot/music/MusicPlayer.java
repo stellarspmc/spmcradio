@@ -82,10 +82,12 @@ public class MusicPlayer {
 
             @Override
             public void noMatches() {
+                System.out.println("printed");
             }
 
             @Override
             public void loadFailed(FriendlyException exception) {
+                exception.printStackTrace();
             }
         });
     }
