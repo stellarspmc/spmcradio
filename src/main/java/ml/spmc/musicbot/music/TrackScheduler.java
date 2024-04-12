@@ -32,10 +32,13 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     public static void shuffle() {
+        AudioTrack playing = player.getPlayingTrack();
         ArrayList<AudioTrack> array = arrayQueue;
 
         queue.clear();
         Collections.shuffle(array);
+        array.remove(playing);
+        array.add(0, playing);
         for (AudioTrack track: array) {
             queue.offer(track);
         }
@@ -49,8 +52,10 @@ public class TrackScheduler extends AudioEventAdapter {
         this.lastTrack = track;
         AudioTrack track2 = queue.poll();
         if (track2 != null) {
-            if (track2.getPosition() == track2.getDuration()) track2.setPosition(0);
+            System.out.println(track2.getInfo().title);
             boolean bool = player.startTrack(track2, false);
+            System.out.println(bool);
+
             if (!bool) MusicPlayer.loopQueue();
         }
 
