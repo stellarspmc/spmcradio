@@ -38,13 +38,14 @@ public class TrackScheduler extends AudioEventAdapter {
 
         array.remove(playing);
         queue.removeAll(array);
+        System.out.println(array);
         System.out.println(Arrays.toString(queue.toArray()));
         Collections.shuffle(array);
         for (AudioTrack track: array) {
             queue.offer(track);
         }
 
-        array.add(playing);
+        array.add(0, playing);
 
         shuffled = !shuffled;
         arrayQueue = array;
@@ -55,10 +56,8 @@ public class TrackScheduler extends AudioEventAdapter {
         this.lastTrack = track;
 
         AudioTrack track2 = queue.poll();
-        assert track2 != null;
-        track2.setPosition(0);
         boolean bool = player.startTrack(track2, false);
-        if (track2.getPosition() == track2.getDuration() || !bool) MusicPlayer.loopQueue();
+        if (!bool) MusicPlayer.loopQueue();
     }
 
     public void clearQueue() {
