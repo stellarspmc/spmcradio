@@ -52,9 +52,7 @@ public class TrackScheduler extends AudioEventAdapter {
         this.lastTrack = track;
         AudioTrack track2 = queue.poll();
         if (track2 != null) {
-            System.out.println(track2.getInfo().title);
             boolean bool = player.startTrack(track2, false);
-            System.out.println(bool);
 
             if (!bool) MusicPlayer.loopQueue();
         }
