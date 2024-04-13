@@ -38,8 +38,6 @@ public class TrackScheduler extends AudioEventAdapter {
 
         array.remove(playing);
         queue.removeAll(array);
-        System.out.println(array);
-        System.out.println(Arrays.toString(queue.toArray()));
         Collections.shuffle(array);
         for (AudioTrack track: array) {
             queue.offer(track);
