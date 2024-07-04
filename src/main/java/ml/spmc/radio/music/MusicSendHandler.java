@@ -1,4 +1,4 @@
-package ml.spmc.musicbot.music;
+package ml.spmc.radio.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;

@@ -1,9 +1,9 @@
-package ml.spmc.musicbot;
+package ml.spmc.radio;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import ml.spmc.musicbot.music.MusicPlayer;
-import ml.spmc.musicbot.music.MusicType;
-import ml.spmc.musicbot.music.TrackScheduler;
+import ml.spmc.radio.music.MusicPlayer;
+import ml.spmc.radio.music.MusicType;
+import ml.spmc.radio.music.TrackScheduler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -21,9 +21,6 @@ import java.awt.*;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.TemporalAccessor;
-import java.time.temporal.TemporalAdjusters;
-import java.time.temporal.TemporalQueries;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -58,6 +55,20 @@ public class EventHandler extends ListenerAdapter {
         ).queue();
     }
 
+    private static MessageEmbed createEmbed(String[] details) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle("Now Playing");
+        embedBuilder.addField(details[0].equalsIgnoreCase("a") ? "Playlist: " : "Track:", details[1], true);
+        embedBuilder.addField("Author:", details[2], true);
+        embedBuilder.addField("Duration:", getDuration(Duration.ofMillis(Long.parseLong(details[3]))), true);
+
+        embedBuilder.setColor(new Color(2600572));
+        embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
+        embedBuilder.setFooter("SPMCRadio 2.5p");
+        embedBuilder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
+        return embedBuilder.build();
+    }
+    
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent e) {
         switch (e.getName()) {
@@ -65,31 +76,25 @@ public class EventHandler extends ListenerAdapter {
                 String url = Objects.requireNonNull(e.getOption("song")).getAsString();
                 for (MusicType type: MusicType.values()) {
                     if (url.equals(type.name().toLowerCase()) || url.equals(type.name().toUpperCase())) {
-                        MusicPlayer.stopAndPlay(type.getUrl());
-                        e.reply("Now playing bot's tracks.").queue();
+                        e.replyEmbeds(createEmbed(MusicPlayer.stopAndPlay(type.getUrl()))).queue();
                         return;
                     }
                 }
 
                 url = isValidURL(url) ? url : "ytsearch:" + url;
-                MusicPlayer.stopAndPlay(url);
-
-                e.reply("Now playing external tracks.").queue();
+                e.replyEmbeds(createEmbed(MusicPlayer.stopAndPlay(url))).queue();
             }
             case "queue" -> {
                 String url = Objects.requireNonNull(e.getOption("song")).getAsString();
                 for (MusicType type: MusicType.values()) {
                     if (url.equals(type.name().toLowerCase()) || url.equals(type.name().toUpperCase())) {
-                        MusicPlayer.play(type.getUrl());
-                        e.reply("Now queuing bot's tracks.").queue();
+                        e.replyEmbeds(createEmbed(MusicPlayer.play(type.getUrl()))).queue();
                         return;
                     }
                 }
 
                 url = isValidURL(url) ? url : "ytsearch:" + url;
-                MusicPlayer.play(url);
-
-                e.reply("Now queuing external tracks.").queue();
+                e.replyEmbeds(createEmbed(MusicPlayer.play(url))).queue();
             }
             case "nowplaying" -> e.replyEmbeds(getNowPlayingEmbed()).queue();
             case "queuelist" -> e.replyEmbeds(getQueueListEmbed()).queue();
@@ -115,7 +120,7 @@ public class EventHandler extends ListenerAdapter {
         embedBuilder.setDescription(getDuration(Duration.ofMillis(playingTrack.getPosition())) + " - " + getDuration(Duration.ofMillis(playingTrack.getDuration())));
         embedBuilder.setColor(new Color(2600572));
         embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
-        embedBuilder.setFooter("MusicBot 2.4.3f");
+        embedBuilder.setFooter("SPMCRadio 2.5p");
         embedBuilder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
         return embedBuilder.build();
     }
@@ -125,9 +130,9 @@ public class EventHandler extends ListenerAdapter {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setColor(new Color(2600572));
         embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
-        embedBuilder.setFooter("MusicBot 2.4.3f");
+        embedBuilder.setFooter("SPMCRadio 2.5p");
         embedBuilder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
-        embedBuilder.setTitle("Queue List");
+        embedBuilder.setTitle("Queue");
 
         AudioTrack[] array = TrackScheduler.arrayQueue.toArray(new AudioTrack[0]);
 
@@ -160,8 +165,8 @@ public class EventHandler extends ListenerAdapter {
         }
 
         embedBuilder.setDescription(string.toString());
-        embedBuilder.addField("Listened music", getDuration(Duration.ofMillis(pos)), true);
-        embedBuilder.addField("Total music", getDuration(Duration.ofMillis(dur)), true);
+        embedBuilder.addField("Listened Duration", getDuration(Duration.ofMillis(pos)), true);
+        embedBuilder.addField("Total Duration", getDuration(Duration.ofMillis(dur)), true);
         return embedBuilder.build();
     }
 

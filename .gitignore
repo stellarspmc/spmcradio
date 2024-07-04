@@ -122,3 +122,5 @@ build/
 target/
 /config.properties
 /dockerfile.txt
+/dependency-reduced-pom.xml
+/bot.jar
