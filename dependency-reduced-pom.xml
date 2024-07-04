@@ -4,8 +4,8 @@
   <groupId>ml.spmc</groupId>
   <artifactId>MusicBot</artifactId>
   <name>MusicBot</name>
-  <version>2.4.2b</version>
-  <url>https://mc.spmc.tk</url>
+  <version>2.4.3f</version>
+  <url>https://mc.spmc.fun</url>
   <build>
     <plugins>
       <plugin>

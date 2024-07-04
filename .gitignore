@@ -121,3 +121,4 @@ remappedSrc/
 build/
 target/
 /config.properties
+/dockerfile.txt
