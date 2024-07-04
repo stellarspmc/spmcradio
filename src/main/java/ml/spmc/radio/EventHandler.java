@@ -58,9 +58,9 @@ public class EventHandler extends ListenerAdapter {
     private static MessageEmbed createEmbed(String[] details) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Now Playing");
-        embedBuilder.addField(details[0].equalsIgnoreCase("a") ? "Playlist: " : "Track:", details[1], true);
-        embedBuilder.addField("Author:", details[2], true);
-        embedBuilder.addField("Duration:", getDuration(Duration.ofMillis(Long.parseLong(details[3]))), true);
+        embedBuilder.addField(details[0].equalsIgnoreCase("a") ? "Playlist " : "Track", details[1], true);
+        embedBuilder.addField("Author", details[2], true);
+        embedBuilder.addField("Duration", getDuration(Duration.ofMillis(Long.parseLong(details[3]))), true);
 
         embedBuilder.setColor(new Color(2600572));
         embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
@@ -116,8 +116,11 @@ public class EventHandler extends ListenerAdapter {
     private static MessageEmbed getNowPlayingEmbed() {
         AudioTrack playingTrack = TrackScheduler.getPlayingTrack();
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle(playingTrack.getInfo().title + " - " + playingTrack.getInfo().author, playingTrack.getInfo().uri);
-        embedBuilder.setDescription(getDuration(Duration.ofMillis(playingTrack.getPosition())) + " - " + getDuration(Duration.ofMillis(playingTrack.getDuration())));
+        embedBuilder.setTitle("Now Playing");
+        embedBuilder.addField("Track", playingTrack.getInfo().title, true);
+        embedBuilder.addField("Author", playingTrack.getInfo().author, true);
+        embedBuilder.addField("Duration", getDuration(Duration.ofMillis(playingTrack.getPosition())) + " - " + getDuration(Duration.ofMillis(playingTrack.getDuration())), true);
+
         embedBuilder.setColor(new Color(2600572));
         embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
         embedBuilder.setFooter("SPMCRadio 2.5p");

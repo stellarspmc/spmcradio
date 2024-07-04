@@ -13,9 +13,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static ml.spmc.radio.SPMCRadio.bot;
 
@@ -62,25 +60,20 @@ public class MusicPlayer {
         return play(url);
     }
 
+    public static String[] details = new String[4];
     public static String[] play(String url) {
-        final String[] details = new String[4]; // 0 - type, 1 - title, 2 - author, 3 - duration
+        details = new String[4];
         manager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                details[0] = "Track";
-                details[1] = track.getInfo().title;
-                details[2] = track.getInfo().author;
-                details[3] = String.valueOf(track.getDuration());
+                musicManager.scheduler.passOnData(track);
                 musicManager.scheduler.queue(track);
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist playList) {
+                musicManager.scheduler.passOnList(playList, url);
                 List<AudioTrack> tracks = playList.getTracks();
-                details[0] = "a";
-                details[1] = playList.getName();
-                details[2] = playList.isSearchResult() ? "Search Result" : "Unknown";
-                details[3] = url.contains("ytsearch") ? String.valueOf(tracks.get(0).getDuration()) : String.valueOf(tracks.stream().mapToLong(AudioTrack::getDuration).sum());
                 if (url.contains("ytsearch")) musicManager.scheduler.queue(tracks.get(0));
                 else tracks.forEach(musicManager.scheduler::queue);
             }
@@ -93,7 +86,6 @@ public class MusicPlayer {
             public void loadFailed(FriendlyException exception) {
             }
         });
-
         return details;
     }
 }

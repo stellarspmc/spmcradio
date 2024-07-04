@@ -2,6 +2,7 @@ package ml.spmc.radio.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
+import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
@@ -23,6 +24,20 @@ public class TrackScheduler extends AudioEventAdapter {
         TrackScheduler.player = player;
         queue = new LinkedBlockingQueue<>();
         arrayQueue = new ArrayList<>();
+    }
+
+    public void passOnData(AudioTrack track) {
+        MusicPlayer.details[0] = "Track";
+        MusicPlayer.details[1] = track.getInfo().title;
+        MusicPlayer.details[2] = track.getInfo().author;
+        MusicPlayer.details[3] = String.valueOf(track.getDuration());
+    }
+
+    public void passOnList(AudioPlaylist list, String url) {
+        MusicPlayer.details[0] = "a";
+        MusicPlayer.details[1] = list.getName();
+        MusicPlayer.details[2] = list.isSearchResult() ? "Search Result" : "Unknown";
+        MusicPlayer.details[3] = url.contains("ytsearch") ? String.valueOf(list.getTracks().get(0).getDuration()) : String.valueOf(list.getTracks().stream().mapToLong(AudioTrack::getDuration).sum());
     }
 
     public void queue(AudioTrack track) {
