@@ -6,7 +6,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -40,6 +39,7 @@ public class TrackScheduler extends AudioEventAdapter {
         queue.removeAll(array);
         Collections.shuffle(array);
         for (AudioTrack track: array) {
+            track.setPosition(0);
             queue.offer(track);
         }
 
@@ -56,6 +56,8 @@ public class TrackScheduler extends AudioEventAdapter {
         AudioTrack track2 = queue.poll();
         boolean bool = player.startTrack(track2, false);
         if (!bool) MusicPlayer.loopQueue();
+
+        if (getPlayingTrack().getPosition() == getPlayingTrack().getDuration()) getPlayingTrack().setPosition(0);
     }
 
     public void clearQueue() {

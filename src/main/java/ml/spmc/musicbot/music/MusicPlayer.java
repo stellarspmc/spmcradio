@@ -41,7 +41,7 @@ public class MusicPlayer {
         }
         if (player.isPaused()) player.setPaused(false);
         if (player.getVolume() == 0) player.setVolume(50);
-        play(MusicType.SMP.getUrl());
+        play(MusicType.DEFAULT.getUrl());
         TrackScheduler.shuffle();
     }
 
@@ -82,7 +82,6 @@ public class MusicPlayer {
 
             @Override
             public void noMatches() {
-                System.out.println("printed");
             }
 
             @Override

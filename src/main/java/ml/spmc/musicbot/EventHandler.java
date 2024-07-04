@@ -20,6 +20,10 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 import java.net.URL;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.TemporalQueries;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -110,7 +114,9 @@ public class EventHandler extends ListenerAdapter {
         embedBuilder.setTitle(playingTrack.getInfo().title + " - " + playingTrack.getInfo().author, playingTrack.getInfo().uri);
         embedBuilder.setDescription(getDuration(Duration.ofMillis(playingTrack.getPosition())) + " - " + getDuration(Duration.ofMillis(playingTrack.getDuration())));
         embedBuilder.setColor(new Color(2600572));
-        embedBuilder.setAuthor("Provided by TCFPlayz", "https://dc.spmc.tk", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
+        embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
+        embedBuilder.setFooter("MusicBot 2.4.3f");
+        embedBuilder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
         return embedBuilder.build();
     }
 
@@ -118,7 +124,9 @@ public class EventHandler extends ListenerAdapter {
     private static MessageEmbed getQueueListEmbed() {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setColor(new Color(2600572));
-        embedBuilder.setAuthor("Provided by TCFPlayz", "https://dc.spmc.tk", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
+        embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
+        embedBuilder.setFooter("MusicBot 2.4.3f");
+        embedBuilder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
         embedBuilder.setTitle("Queue List");
 
         AudioTrack[] array = TrackScheduler.arrayQueue.toArray(new AudioTrack[0]);
