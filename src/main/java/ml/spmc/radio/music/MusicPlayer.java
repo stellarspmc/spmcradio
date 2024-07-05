@@ -52,30 +52,24 @@ public class MusicPlayer {
         }
     }
 
-    public static String[] stopAndPlay(String url) {
+    public static void stopAndPlay(String url) {
         musicManager.scheduler.clearQueue();
         player.stopTrack();
 
         TrackScheduler.shuffled = false;
-        return play(url);
+        play(url);
     }
 
-    public static String[] details = new String[4];
-    public static String[] play(String url) {
-        details = new String[4];
+    public static void play(String url) {
         manager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                musicManager.scheduler.passOnData(track);
-                musicManager.scheduler.queue(track);
+                musicManager.scheduler.queueTrack(track);
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist playList) {
-                musicManager.scheduler.passOnList(playList, url);
-                List<AudioTrack> tracks = playList.getTracks();
-                if (url.contains("ytsearch")) musicManager.scheduler.queue(tracks.get(0));
-                else tracks.forEach(musicManager.scheduler::queue);
+                musicManager.scheduler.queuePlaylist(playList);
             }
 
             @Override
@@ -86,6 +80,5 @@ public class MusicPlayer {
             public void loadFailed(FriendlyException exception) {
             }
         });
-        return details;
     }
 }

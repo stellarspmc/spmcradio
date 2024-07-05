@@ -5,20 +5,43 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
+import java.awt.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static ml.spmc.radio.EventHandler.getDuration;
+
 
 public class TrackScheduler extends AudioEventAdapter {
+
+    private static MessageEmbed createEmbed(String[] detail) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle("Now Playing");
+        embedBuilder.addField(detail[0].equalsIgnoreCase("a") ? "Playlist " : "Track", detail[1], true);
+        embedBuilder.addField("Author", detail[2], true);
+        embedBuilder.addField("Duration", getDuration(Duration.ofMillis(Long.parseLong(detail[3]))), true);
+
+        embedBuilder.setColor(new Color(2600572));
+        embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
+        embedBuilder.setFooter("SPMCRadio 2.5p");
+        embedBuilder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
+        return embedBuilder.build();
+    }
 
     private static AudioPlayer player;
     private static BlockingQueue<AudioTrack> queue;
     public static ArrayList<AudioTrack> arrayQueue;
     AudioTrack lastTrack;
     public static boolean shuffled = false;
+    private static String[] details;
 
     public TrackScheduler(AudioPlayer player) {
         TrackScheduler.player = player;
@@ -26,24 +49,27 @@ public class TrackScheduler extends AudioEventAdapter {
         arrayQueue = new ArrayList<>();
     }
 
-    public void passOnData(AudioTrack track) {
-        MusicPlayer.details[0] = "Track";
-        MusicPlayer.details[1] = track.getInfo().title;
-        MusicPlayer.details[2] = track.getInfo().author;
-        MusicPlayer.details[3] = String.valueOf(track.getDuration());
-    }
-
-    public void passOnList(AudioPlaylist list, String url) {
-        MusicPlayer.details[0] = "a";
-        MusicPlayer.details[1] = list.getName();
-        MusicPlayer.details[2] = list.isSearchResult() ? "Search Result" : "Unknown";
-        MusicPlayer.details[3] = url.contains("ytsearch") ? String.valueOf(list.getTracks().get(0).getDuration()) : String.valueOf(list.getTracks().stream().mapToLong(AudioTrack::getDuration).sum());
-    }
-
-    public void queue(AudioTrack track) {
+    private void queue(AudioTrack track) {
         if (!arrayQueue.isEmpty()) queue.offer(track);
         player.startTrack(track, true);
         arrayQueue.add(track);
+    }
+
+    public void queuePlaylist(AudioPlaylist playlist) {
+        details[0] = playlist.isSearchResult() ? "" : "a";
+        details[1] = playlist.isSearchResult() ? playlist.getSelectedTrack().getInfo().title : playlist.getName();
+        details[2] = playlist.isSearchResult() ? playlist.getSelectedTrack().getInfo().author : "Feature Unavailable";
+        details[3] = String.valueOf(playlist.isSearchResult() ? playlist.getSelectedTrack().getDuration() : playlist.getTracks().stream().mapToLong(AudioTrack::getDuration).sum());
+        if (playlist.isSearchResult()) queue(playlist.getSelectedTrack());
+        else playlist.getTracks().forEach(this::queue);
+    }
+
+    public void queueTrack(AudioTrack track) {
+        details[0] = "";
+        details[1] = track.getInfo().title;
+        details[2] = track.getInfo().author;
+        details[3] = String.valueOf(track.getDuration());
+        queue(track);
     }
 
     public static void shuffle() {

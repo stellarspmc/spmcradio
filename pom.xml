@@ -50,7 +50,7 @@
     <dependency>
       <groupId>dev.arbjerg</groupId>
       <artifactId>lavaplayer</artifactId>
-      <version>0eaeee195f0315b2617587aa3537fa202df07ddc-SNAPSHOT</version>
+      <version>a91db122d86f9881cc978abbe06b0fae2a47bc62-SNAPSHOT</version>
     </dependency>
   </dependencies>
 

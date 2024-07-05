@@ -22,12 +22,14 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EventHandler extends ListenerAdapter {
+    public static String[] details = new String[4];
 
     private static boolean isValidURL(String urlString) {
         try {
@@ -54,47 +56,39 @@ public class EventHandler extends ListenerAdapter {
                 Commands.slash("shuffle", "Shuffles the queue!")
         ).queue();
     }
-
-    private static MessageEmbed createEmbed(String[] details) {
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Now Playing");
-        embedBuilder.addField(details[0].equalsIgnoreCase("a") ? "Playlist " : "Track", details[1], true);
-        embedBuilder.addField("Author", details[2], true);
-        embedBuilder.addField("Duration", getDuration(Duration.ofMillis(Long.parseLong(details[3]))), true);
-
-        embedBuilder.setColor(new Color(2600572));
-        embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
-        embedBuilder.setFooter("SPMCRadio 2.5p");
-        embedBuilder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
-        return embedBuilder.build();
-    }
     
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent e) {
+        System.out.println("after wipe: " + Arrays.toString(EventHandler.details));
+
         switch (e.getName()) {
             case "play" -> {
                 String url = Objects.requireNonNull(e.getOption("song")).getAsString();
                 for (MusicType type: MusicType.values()) {
                     if (url.equals(type.name().toLowerCase()) || url.equals(type.name().toUpperCase())) {
-                        e.replyEmbeds(createEmbed(MusicPlayer.stopAndPlay(type.getUrl()))).queue();
+                        MusicPlayer.stopAndPlay(type.getUrl());
+                        e.reply("Now playing tracks.").queue();
                         return;
                     }
                 }
 
                 url = isValidURL(url) ? url : "ytsearch:" + url;
-                e.replyEmbeds(createEmbed(MusicPlayer.stopAndPlay(url))).queue();
+                MusicPlayer.stopAndPlay(url);
+                e.reply("Now playing tracks.").queue();
             }
             case "queue" -> {
                 String url = Objects.requireNonNull(e.getOption("song")).getAsString();
                 for (MusicType type: MusicType.values()) {
                     if (url.equals(type.name().toLowerCase()) || url.equals(type.name().toUpperCase())) {
-                        e.replyEmbeds(createEmbed(MusicPlayer.play(type.getUrl()))).queue();
+                        MusicPlayer.play(type.getUrl());
+                        e.reply("Now queuing tracks.").queue();
                         return;
                     }
                 }
 
                 url = isValidURL(url) ? url : "ytsearch:" + url;
-                e.replyEmbeds(createEmbed(MusicPlayer.play(url))).queue();
+                MusicPlayer.play(url);
+                e.reply("Now queuing tracks.").queue();
             }
             case "nowplaying" -> e.replyEmbeds(getNowPlayingEmbed()).queue();
             case "queuelist" -> e.replyEmbeds(getQueueListEmbed()).queue();
@@ -174,7 +168,7 @@ public class EventHandler extends ListenerAdapter {
     }
 
     @NotNull
-    private static String getDuration(Duration d) {
+    public static String getDuration(Duration d) {
         String m = String.valueOf(d.toMinutesPart());
         String s = String.valueOf(d.toSecondsPart());
         String h = String.valueOf(d.toHoursPart());
