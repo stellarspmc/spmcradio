@@ -80,7 +80,7 @@ public class TrackScheduler extends AudioEventAdapter {
         queue.removeAll(array);
         Collections.shuffle(array);
         for (AudioTrack track: array) {
-            track.setPosition(0);
+            if (!track.equals(playing)) track.setPosition(0);
             queue.offer(track);
         }
 
