@@ -1,9 +1,9 @@
-package ml.spmc.radio;
+package fun.spmc.radio;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import ml.spmc.radio.music.MusicPlayer;
-import ml.spmc.radio.music.MusicType;
-import ml.spmc.radio.music.TrackScheduler;
+import fun.spmc.radio.music.MusicPlayer;
+import fun.spmc.radio.music.MusicType;
+import fun.spmc.radio.music.TrackScheduler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -22,14 +22,12 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EventHandler extends ListenerAdapter {
-    public static String[] details = new String[4];
 
     private static boolean isValidURL(String urlString) {
         try {
@@ -59,8 +57,6 @@ public class EventHandler extends ListenerAdapter {
     
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent e) {
-        System.out.println("after wipe: " + Arrays.toString(EventHandler.details));
-
         switch (e.getName()) {
             case "play" -> {
                 String url = Objects.requireNonNull(e.getOption("song")).getAsString();
@@ -117,7 +113,7 @@ public class EventHandler extends ListenerAdapter {
 
         embedBuilder.setColor(new Color(2600572));
         embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
-        embedBuilder.setFooter("SPMCRadio 2.5p");
+        embedBuilder.setFooter("SPMCRadio 2.5.3");
         embedBuilder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
         return embedBuilder.build();
     }
@@ -127,7 +123,7 @@ public class EventHandler extends ListenerAdapter {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setColor(new Color(2600572));
         embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
-        embedBuilder.setFooter("SPMCRadio 2.5p");
+        embedBuilder.setFooter("SPMCRadio 2.5.3");
         embedBuilder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
         embedBuilder.setTitle("Queue");
 

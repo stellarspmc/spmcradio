@@ -1,4 +1,4 @@
-package ml.spmc.radio.music;
+package fun.spmc.radio.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -9,14 +9,14 @@ import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import ml.spmc.radio.Config;
+import fun.spmc.radio.Config;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 
 import java.util.*;
 
-import static ml.spmc.radio.SPMCRadio.bot;
+import static fun.spmc.radio.SPMCRadio.bot;
 
 public class MusicPlayer {
 
@@ -27,16 +27,15 @@ public class MusicPlayer {
     private static final AudioPlayer player = musicManager.player;
 
     public static void playMusic() {
+        manager.registerSourceManager(new dev.lavalink.youtube.YoutubeAudioSourceManager());
+
         VoiceChannel channel = bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID);
         assert guild != null;
-        dev.lavalink.youtube.YoutubeAudioSourceManager ytSourceManager = new dev.lavalink.youtube.YoutubeAudioSourceManager();
-        manager.registerSourceManager(ytSourceManager);
-
         final AudioManager manager2 = guild.getAudioManager();
         manager2.setSendingHandler(musicManager.getSendHandler());
         if (!manager2.isConnected()) {
             manager2.openAudioConnection(channel);
-            AudioSourceManagers.registerRemoteSources(manager, YoutubeAudioSourceManager.class);
+             AudioSourceManagers.registerRemoteSources(manager, YoutubeAudioSourceManager.class);
             AudioSourceManagers.registerLocalSource(manager);
             manager2.setSelfDeafened(true);
             player.setVolume(100);
@@ -78,10 +77,12 @@ public class MusicPlayer {
 
             @Override
             public void noMatches() {
+                System.out.println("No matches");
             }
 
             @Override
             public void loadFailed(FriendlyException exception) {
+                exception.printStackTrace();
             }
         });
     }

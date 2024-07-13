@@ -1,6 +1,6 @@
-package ml.spmc.radio;
+package fun.spmc.radio;
 
-import ml.spmc.radio.music.MusicPlayer;
+import fun.spmc.radio.music.MusicPlayer;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;

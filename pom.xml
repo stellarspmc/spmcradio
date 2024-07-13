@@ -2,8 +2,8 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>ml.spmc</groupId>
-  <artifactId>MusicBot</artifactId>
-  <version>2.5.2</version>
+  <artifactId>SPMCRadio</artifactId>
+  <version>2.5.3</version>
   <build>
     <plugins>
       <plugin>
@@ -15,14 +15,14 @@
             <manifest>
               <addClasspath>true</addClasspath>
               <classpathPrefix>lib/</classpathPrefix>
-              <mainClass>ml.spmc.musicbot.MusicBot</mainClass>
+              <mainClass>fun.spmc.radio.SPMCRadio</mainClass>
             </manifest>
           </archive>
         </configuration>
       </plugin>
     </plugins>
   </build>
-  <name>MusicBot</name>
+  <name>SPMCRadio</name>
   <url>https://mc.spmc.fun</url>
 
   <repositories>
@@ -60,6 +60,11 @@
       <groupId>dev.lavalink.youtube</groupId>
       <artifactId>v2</artifactId>
       <version>1.4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.5.6</version>
     </dependency>
   </dependencies>
 

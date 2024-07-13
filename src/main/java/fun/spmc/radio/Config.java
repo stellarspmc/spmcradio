@@ -1,4 +1,4 @@
-package ml.spmc.radio;
+package fun.spmc.radio;
 
 import java.io.*;
 import java.net.URISyntaxException;

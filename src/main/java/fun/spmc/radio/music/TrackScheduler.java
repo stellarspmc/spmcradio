@@ -1,4 +1,4 @@
-package ml.spmc.radio.music;
+package fun.spmc.radio.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static ml.spmc.radio.EventHandler.getDuration;
+import static fun.spmc.radio.EventHandler.getDuration;
 
 
 public class TrackScheduler extends AudioEventAdapter {
@@ -30,7 +30,7 @@ public class TrackScheduler extends AudioEventAdapter {
 
         embedBuilder.setColor(new Color(2600572));
         embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
-        embedBuilder.setFooter("SPMCRadio 2.5p");
+        embedBuilder.setFooter("SPMCRadio 2.5.3");
         embedBuilder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
         return embedBuilder.build();
     }
@@ -40,7 +40,6 @@ public class TrackScheduler extends AudioEventAdapter {
     public static ArrayList<AudioTrack> arrayQueue;
     AudioTrack lastTrack;
     public static boolean shuffled = false;
-    private static String[] details;
 
     public TrackScheduler(AudioPlayer player) {
         TrackScheduler.player = player;
@@ -55,19 +54,11 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     public void queuePlaylist(AudioPlaylist playlist) {
-        details[0] = playlist.isSearchResult() ? "" : "a";
-        details[1] = playlist.isSearchResult() ? playlist.getSelectedTrack().getInfo().title : playlist.getName();
-        details[2] = playlist.isSearchResult() ? playlist.getSelectedTrack().getInfo().author : "Feature Unavailable";
-        details[3] = String.valueOf(playlist.isSearchResult() ? playlist.getSelectedTrack().getDuration() : playlist.getTracks().stream().mapToLong(AudioTrack::getDuration).sum());
         if (playlist.isSearchResult()) queue(playlist.getSelectedTrack());
         else playlist.getTracks().forEach(this::queue);
     }
 
     public void queueTrack(AudioTrack track) {
-        details[0] = "";
-        details[1] = track.getInfo().title;
-        details[2] = track.getInfo().author;
-        details[3] = String.valueOf(track.getDuration());
         queue(track);
     }
 

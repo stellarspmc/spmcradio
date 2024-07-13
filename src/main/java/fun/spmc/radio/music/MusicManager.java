@@ -1,4 +1,4 @@
-package ml.spmc.radio.music;
+package fun.spmc.radio.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
