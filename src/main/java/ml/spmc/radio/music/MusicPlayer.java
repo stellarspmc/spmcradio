@@ -1,4 +1,4 @@
-package ml.spmc.musicbot.music;
+package ml.spmc.radio.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -9,16 +9,14 @@ import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import ml.spmc.musicbot.Config;
+import ml.spmc.radio.Config;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
-import static ml.spmc.musicbot.MusicBot.bot;
+import static ml.spmc.radio.SPMCRadio.bot;
 
 public class MusicPlayer {
 
@@ -70,18 +68,12 @@ public class MusicPlayer {
         manager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                musicManager.scheduler.queue(track);
+                musicManager.scheduler.queueTrack(track);
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist playList) {
-                List<AudioTrack> tracks = playList.getTracks();
-                if (url.contains("ytsearch")) musicManager.scheduler.queue(playList.getTracks().get(0));
-                else {
-                    for (AudioTrack track: tracks) {
-                        musicManager.scheduler.queue(track);
-                    }
-                }
+                musicManager.scheduler.queuePlaylist(playList);
             }
 
             @Override
@@ -90,7 +82,6 @@ public class MusicPlayer {
 
             @Override
             public void loadFailed(FriendlyException exception) {
-                exception.printStackTrace();
             }
         });
     }

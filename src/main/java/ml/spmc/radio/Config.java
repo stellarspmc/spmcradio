@@ -1,4 +1,4 @@
-package ml.spmc.musicbot;
+package ml.spmc.radio;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -16,7 +16,7 @@ public class Config {
     // ran when start
     public static void checkConfigs() {
         try {
-            Path path = Paths.get(new File(MusicBot.class.getProtectionDomain().getCodeSource().getLocation()
+            Path path = Paths.get(new File(SPMCRadio.class.getProtectionDomain().getCodeSource().getLocation()
                     .toURI()).getPath()).getParent().resolve("config.properties");
             if (!Files.exists(path)) {
                 Files.createFile(path);

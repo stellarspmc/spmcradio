@@ -1,4 +1,4 @@
-package ml.spmc.musicbot.music;
+package ml.spmc.radio.music;
 
 public enum MusicType {
     DEFAULT("https://youtube.com/playlist?list=PLy_S3qOMUL1epiuCU4kBTOpLo1xOFJSLx"), // 2022
