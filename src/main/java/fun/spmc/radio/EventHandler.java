@@ -49,7 +49,7 @@ public class EventHandler extends ListenerAdapter {
                         .addOption(OptionType.STRING, "song", "The song you want to queue.", true, true),
                 Commands.slash("nowplaying", "Check what song is playing!"),
                 Commands.slash("queuelist", "Get the queue list of songs!"),
-                Commands.slash("volume", "Only for owner cuz scared of abusing")
+                Commands.slash("volume", "Only for admins.")
                         .addOption(OptionType.INTEGER, "volume", "Volume", true, false),
                 Commands.slash("shuffle", "Shuffles the queue!")
         ).queue();
