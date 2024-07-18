@@ -5,35 +5,18 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
 
-import java.awt.*;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static fun.spmc.radio.EventHandler.getDuration;
+import static fun.spmc.radio.SPMCRadio.bot;
 
 
 public class TrackScheduler extends AudioEventAdapter {
-
-    private static MessageEmbed createEmbed(String[] detail) {
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Now Playing");
-        embedBuilder.addField(detail[0].equalsIgnoreCase("a") ? "Playlist " : "Track", detail[1], true);
-        embedBuilder.addField("Author", detail[2], true);
-        embedBuilder.addField("Duration", getDuration(Duration.ofMillis(Long.parseLong(detail[3]))), true);
-
-        embedBuilder.setColor(new Color(2600572));
-        embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
-        embedBuilder.setFooter("SPMCRadio 2.5.3");
-        embedBuilder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
-        return embedBuilder.build();
-    }
 
     private static AudioPlayer player;
     private static BlockingQueue<AudioTrack> queue;
@@ -48,6 +31,7 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     private void queue(AudioTrack track) {
+        bot.getPresence().setPresence(OnlineStatus.ONLINE, Activity.listening(track.getInfo().title));
         if (!arrayQueue.isEmpty()) queue.offer(track);
         player.startTrack(track, true);
         arrayQueue.add(track);
