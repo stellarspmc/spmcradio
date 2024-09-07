@@ -7,18 +7,43 @@ import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
+import com.sedmelluq.discord.lavaplayer.track.AudioItem;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fun.spmc.radio.Config;
+import fun.spmc.radio.Utilities;
+import fun.spmc.radio.discord.Config;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.managers.AudioManager;
+import net.dv8tion.jda.api.utils.MarkdownUtil;
 
+import java.time.Duration;
 import java.util.*;
 
 import static fun.spmc.radio.SPMCRadio.bot;
 
 public class MusicPlayer {
+
+    private static MessageEmbed createEmbed(AudioItem item, User user) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+        if (item instanceof AudioTrack track) {
+            embedBuilder.addField("Queuing Track", MarkdownUtil.monospace(track.getInfo().title), true);
+            embedBuilder.addField("Requested By", "<@" + user.getId() + ">", true);
+            embedBuilder.addField("Duration", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(track.getDuration()))), true);
+
+        } else if (item instanceof AudioPlaylist playlist) {
+            embedBuilder.addField("Queuing Playlist", MarkdownUtil.monospace(playlist.getName()), true);
+            embedBuilder.addField("Requested By", "<@" + user.getId() + ">", true);
+            embedBuilder.addField("Duration", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(playlist.getTracks().stream().mapToLong(AudioTrack::getDuration).sum()))), true);
+        }
+
+        return Utilities.appendEmbed(embedBuilder);
+    }
 
     private static final AudioPlayerManager manager = new DefaultAudioPlayerManager();
 
@@ -35,15 +60,14 @@ public class MusicPlayer {
         manager2.setSendingHandler(musicManager.getSendHandler());
         if (!manager2.isConnected()) {
             manager2.openAudioConnection(channel);
-             AudioSourceManagers.registerRemoteSources(manager, YoutubeAudioSourceManager.class);
+            AudioSourceManagers.registerRemoteSources(manager, YoutubeAudioSourceManager.class);
             AudioSourceManagers.registerLocalSource(manager);
             manager2.setSelfDeafened(true);
             player.setVolume(100);
         }
         if (player.isPaused()) player.setPaused(false);
         if (player.getVolume() == 0) player.setVolume(50);
-        play(MusicType.DEFAULT.getUrl());
-        TrackScheduler.shuffle();
+        loadSong(MusicType.DEFAULT.getUrl(), null);
     }
 
     public static void loopQueue() {
@@ -51,28 +75,37 @@ public class MusicPlayer {
         if (TrackScheduler.shuffled) Collections.shuffle(queue);
         musicManager.scheduler.clearQueue();
         for (AudioTrack track: queue) {
-            play(track.getInfo().uri);
+            loadSong(track.getInfo().uri, null);
         }
     }
 
-    public static void stopAndPlay(String url) {
+    public static void stopAndLoadSong(String url, SlashCommandInteractionEvent event) {
         musicManager.scheduler.clearQueue();
         player.stopTrack();
 
         TrackScheduler.shuffled = false;
-        play(url);
+        loadSong(url, event);
     }
 
-    public static void play(String url) {
+    public static void loadSong(String url, SlashCommandInteractionEvent event) {
         manager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
+
             @Override
             public void trackLoaded(AudioTrack track) {
-                musicManager.scheduler.queueTrack(track);
+                musicManager.scheduler.queue(track);
+                if (event != null) event.replyEmbeds(createEmbed(track, event.getUser())).queue();
             }
 
             @Override
-            public void playlistLoaded(AudioPlaylist playList) {
-                musicManager.scheduler.queuePlaylist(playList);
+            public void playlistLoaded(AudioPlaylist playlist) {
+                if (playlist.isSearchResult()) {
+                    musicManager.scheduler.queue(playlist.getSelectedTrack());
+                    if (event != null) event.replyEmbeds(createEmbed(playlist.getSelectedTrack(), event.getUser())).queue();
+                }
+                else {
+                    playlist.getTracks().forEach(musicManager.scheduler::queue);
+                    if (event != null) event.replyEmbeds(createEmbed(playlist, event.getUser())).queue();
+                }
             }
 
             @Override

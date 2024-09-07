@@ -1,5 +1,7 @@
 package fun.spmc.radio;
 
+import fun.spmc.radio.discord.Config;
+import fun.spmc.radio.discord.EventHandler;
 import fun.spmc.radio.music.MusicPlayer;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;

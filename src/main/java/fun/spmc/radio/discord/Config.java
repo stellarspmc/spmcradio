@@ -1,4 +1,6 @@
-package fun.spmc.radio;
+package fun.spmc.radio.discord;
+
+import fun.spmc.radio.SPMCRadio;
 
 import java.io.*;
 import java.net.URISyntaxException;

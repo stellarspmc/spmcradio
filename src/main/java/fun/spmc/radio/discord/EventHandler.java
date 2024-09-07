@@ -1,31 +1,27 @@
-package fun.spmc.radio;
+package fun.spmc.radio.discord;
 
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fun.spmc.radio.music.MusicPlayer;
-import fun.spmc.radio.music.MusicType;
-import fun.spmc.radio.music.TrackScheduler;
+import com.sedmelluq.discord.lavaplayer.track.*;
+
+import fun.spmc.radio.Utilities;
+import fun.spmc.radio.music.*;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
-import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.*;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.*;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import net.dv8tion.jda.api.utils.MarkdownUtil;
+import org.jetbrains.annotations.*;
 
 import java.awt.*;
 import java.net.URL;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.time.*;
+import java.util.*;
+import java.util.stream.*;
 
 public class EventHandler extends ListenerAdapter {
 
@@ -51,7 +47,8 @@ public class EventHandler extends ListenerAdapter {
                 Commands.slash("queuelist", "Get the queue list of songs!"),
                 Commands.slash("volume", "Only for admins.")
                         .addOption(OptionType.INTEGER, "volume", "Volume", true, false),
-                Commands.slash("shuffle", "Shuffles the queue!")
+                Commands.slash("shuffle", "Shuffles the queue!"),
+                Commands.slash("skip", "Skip the song playing.")
         ).queue();
     }
     
@@ -61,43 +58,43 @@ public class EventHandler extends ListenerAdapter {
             case "play" -> {
                 String url = Objects.requireNonNull(e.getOption("song")).getAsString();
                 for (MusicType type: MusicType.values()) {
-                    if (url.equals(type.name().toLowerCase()) || url.equals(type.name().toUpperCase())) {
-                        MusicPlayer.stopAndPlay(type.getUrl());
-                        e.reply("Now playing tracks.").queue();
+                    if (url.equalsIgnoreCase(type.name())) {
+                        MusicPlayer.stopAndLoadSong(type.getUrl(), e);
                         return;
                     }
                 }
 
-                url = isValidURL(url) ? url : "ytsearch:" + url;
-                MusicPlayer.stopAndPlay(url);
-                e.reply("Now playing tracks.").queue();
+                url = isValidURL(url) ? url : "ytmsearch:" + url;
+                MusicPlayer.stopAndLoadSong(url, e);
             }
             case "queue" -> {
                 String url = Objects.requireNonNull(e.getOption("song")).getAsString();
                 for (MusicType type: MusicType.values()) {
                     if (url.equals(type.name().toLowerCase()) || url.equals(type.name().toUpperCase())) {
-                        MusicPlayer.play(type.getUrl());
-                        e.reply("Now queuing tracks.").queue();
+                        MusicPlayer.loadSong(type.getUrl(), e);
                         return;
                     }
                 }
 
-                url = isValidURL(url) ? url : "ytsearch:" + url;
-                MusicPlayer.play(url);
-                e.reply("Now queuing tracks.").queue();
+                url = isValidURL(url) ? url : "ytmsearch:" + url;
+                MusicPlayer.loadSong(url, e);
             }
             case "nowplaying" -> e.replyEmbeds(getNowPlayingEmbed()).queue();
             case "queuelist" -> e.replyEmbeds(getQueueListEmbed()).queue();
             case "volume" -> {
                 int volume = Objects.requireNonNull(e.getOption("volume")).getAsInt();
-                if (volume > 100 || volume < 0) e.deferReply().queue();
+                if (volume > 100 || volume < 0) volume = 50;
                 if (!Objects.requireNonNull(e.getMember()).hasPermission(Permission.ADMINISTRATOR)) e.deferReply().queue();
                 TrackScheduler.setVolume(volume);
-                e.reply("Changed volume to " + volume + "%.").queue();
+                e.replyEmbeds(getVolumeEmbed(volume)).queue();
             }
             case "shuffle" -> {
                 TrackScheduler.shuffle();
-                e.reply("Shuffled queue!").queue();
+                e.replyEmbeds(getShuffleEmbed()).queue();
+            }
+            case "skip" -> {
+                TrackScheduler.skipTrack();
+                e.replyEmbeds(getSkipEmbed()).queue();
             }
         }
     }
@@ -106,74 +103,64 @@ public class EventHandler extends ListenerAdapter {
     private static MessageEmbed getNowPlayingEmbed() {
         AudioTrack playingTrack = TrackScheduler.getPlayingTrack();
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Now Playing");
-        embedBuilder.addField("Track", playingTrack.getInfo().title, true);
-        embedBuilder.addField("Author", playingTrack.getInfo().author, true);
-        embedBuilder.addField("Duration", getDuration(Duration.ofMillis(playingTrack.getPosition())) + " - " + getDuration(Duration.ofMillis(playingTrack.getDuration())), true);
+        embedBuilder.addField("Now Playing", MarkdownUtil.monospace(playingTrack.getInfo().title), true);
+        embedBuilder.addField("Author", MarkdownUtil.monospace(playingTrack.getInfo().author), true);
+        embedBuilder.addField("Duration", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(playingTrack.getPosition())) + " - " + Utilities.getDuration(Duration.ofMillis(playingTrack.getDuration()))), true);
+        return Utilities.appendEmbed(embedBuilder);
+    }
 
+    @NotNull
+    private static MessageEmbed getVolumeEmbed(int volume) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setDescription("Changed volume to" + volume +"%.");
         embedBuilder.setColor(new Color(2600572));
-        embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
-        embedBuilder.setFooter("SPMCRadio 2.5.3");
-        embedBuilder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
+        return embedBuilder.build();
+    }
+
+    @NotNull
+    private static MessageEmbed getShuffleEmbed() {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setDescription("Shuffled queue.");
+        embedBuilder.setColor(new Color(2600572));
+        return embedBuilder.build();
+    }
+
+    @NotNull
+    private static MessageEmbed getSkipEmbed() {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setDescription("Skipped track.");
+        embedBuilder.setColor(new Color(2600572));
         return embedBuilder.build();
     }
 
     @NotNull
     private static MessageEmbed getQueueListEmbed() {
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setColor(new Color(2600572));
-        embedBuilder.setAuthor("TCFPlayz", "https://mc.spmc.fun", "https://cdn.discordapp.com/avatars/340022376924446720/dff2fd1a8161150ce10b7138c66ca58c.webp?size=1024");
-        embedBuilder.setFooter("SPMCRadio 2.5.3");
-        embedBuilder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
-        embedBuilder.setTitle("Queue");
+        embedBuilder.setTitle("Queue List");
 
-        AudioTrack[] array = TrackScheduler.arrayQueue.toArray(new AudioTrack[0]);
+        ArrayList<AudioTrack> array = TrackScheduler.arrayQueue;
 
         StringBuilder oldString = new StringBuilder();
         StringBuilder string = new StringBuilder();
         int count = 0;
         long dur = 0;
-        long pos = 0;
 
         for (AudioTrack track: array) {
             count += 1;
-            if (track.equals(TrackScheduler.getPlayingTrack())) oldString
-                        .append("→ ").append(count).append(". ").append(track.getInfo().title)
-                        .append(" - ").append(track.getInfo().author)
-                        .append(" (").append(getDuration(Duration.ofMillis(track.getPosition()))).append(" - ").append(getDuration(Duration.ofMillis(track.getDuration())))
-                        .append(")\n");
-            else oldString
+            oldString
                     .append(count).append(". ").append(track.getInfo().title)
                     .append(" - ").append(track.getInfo().author)
-                    .append(" (").append(getDuration(Duration.ofMillis(track.getPosition()))).append(" - ").append(getDuration(Duration.ofMillis(track.getDuration())))
+                    .append(" (").append(Utilities.getDuration(Duration.ofMillis(track.getDuration())))
                     .append(")\n");
+            dur += track.getDuration();
             if (oldString.toString().length() + string.toString().length() > 4096) break;
             string.append(oldString);
             oldString.setLength(0);
         }
 
-        for (AudioTrack track: array) {
-            dur += track.getDuration();
-            pos += track.getPosition();
-        }
-
         embedBuilder.setDescription(string.toString());
-        embedBuilder.addField("Listened Duration", getDuration(Duration.ofMillis(pos)), true);
-        embedBuilder.addField("Total Duration", getDuration(Duration.ofMillis(dur)), true);
-        return embedBuilder.build();
-    }
-
-    @NotNull
-    public static String getDuration(Duration d) {
-        String m = String.valueOf(d.toMinutesPart());
-        String s = String.valueOf(d.toSecondsPart());
-        String h = String.valueOf(d.toHoursPart());
-
-        if (Integer.parseInt(m) < 10) m = "0" + m;
-        if (Integer.parseInt(s) < 10) s = "0" + s;
-        if (Integer.parseInt(h) < 10) h = "0" + h;
-        if (Integer.parseInt(h) == 0) return m + ":" + s;
-        else return h + ":" + m + ":" + s;
+        embedBuilder.addField("Total Time", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(dur))), true);
+        return Utilities.appendEmbed(embedBuilder);
     }
 
     @Override
