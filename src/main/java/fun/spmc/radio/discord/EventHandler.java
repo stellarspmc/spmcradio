@@ -36,8 +36,7 @@ public class EventHandler extends ListenerAdapter {
     }
 
     @Override
-    public void onGuildReady(@Nullable GuildReadyEvent e) {
-        assert e != null;
+    public void onGuildReady(@NotNull GuildReadyEvent e) {
         e.getGuild().updateCommands().addCommands(
                 Commands.slash("play", "Play a song you want to listen! It can be from YouTube or SoundCloud!")
                         .addOption(OptionType.STRING, "song", "The song you want to play.", true, true),
@@ -53,7 +52,7 @@ public class EventHandler extends ListenerAdapter {
     }
     
     @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent e) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent e) {
         switch (e.getName()) {
             case "play" -> {
                 String url = Objects.requireNonNull(e.getOption("song")).getAsString();
@@ -99,8 +98,7 @@ public class EventHandler extends ListenerAdapter {
         }
     }
 
-    @NotNull
-    private static MessageEmbed getNowPlayingEmbed() {
+    private static @NotNull MessageEmbed getNowPlayingEmbed() {
         AudioTrack playingTrack = TrackScheduler.getPlayingTrack();
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.addField("Now Playing", MarkdownUtil.monospace(playingTrack.getInfo().title), true);
@@ -109,32 +107,28 @@ public class EventHandler extends ListenerAdapter {
         return Utilities.appendEmbed(embedBuilder);
     }
 
-    @NotNull
-    private static MessageEmbed getVolumeEmbed(int volume) {
+    private static @NotNull MessageEmbed getVolumeEmbed(int volume) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setDescription("Changed volume to" + volume +"%.");
+        embedBuilder.setDescription("Changed volume to " + MarkdownUtil.monospace(String.valueOf(volume)) +"%.");
         embedBuilder.setColor(new Color(2600572));
         return embedBuilder.build();
     }
 
-    @NotNull
-    private static MessageEmbed getShuffleEmbed() {
+    private static @NotNull MessageEmbed getShuffleEmbed() {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setDescription("Shuffled queue.");
         embedBuilder.setColor(new Color(2600572));
         return embedBuilder.build();
     }
 
-    @NotNull
-    private static MessageEmbed getSkipEmbed() {
+    private static @NotNull MessageEmbed getSkipEmbed() {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setDescription("Skipped track.");
         embedBuilder.setColor(new Color(2600572));
         return embedBuilder.build();
     }
 
-    @NotNull
-    private static MessageEmbed getQueueListEmbed() {
+    private static @NotNull MessageEmbed getQueueListEmbed() {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Queue List");
 
@@ -142,29 +136,26 @@ public class EventHandler extends ListenerAdapter {
 
         StringBuilder oldString = new StringBuilder();
         StringBuilder string = new StringBuilder();
-        int count = 0;
-        long dur = 0;
 
         for (AudioTrack track: array) {
-            count += 1;
             oldString
-                    .append(count).append(". ").append(track.getInfo().title)
+                    .append(array.indexOf(track) + 1).append(". ").append(track.getInfo().title).append(" - ").append(track.getInfo().author).append("\n")
                     .append(" - ").append(track.getInfo().author)
                     .append(" (").append(Utilities.getDuration(Duration.ofMillis(track.getDuration())))
                     .append(")\n");
-            dur += track.getDuration();
             if (oldString.toString().length() + string.toString().length() > 4096) break;
             string.append(oldString);
             oldString.setLength(0);
         }
 
         embedBuilder.setDescription(string.toString());
-        embedBuilder.addField("Total Time", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(dur))), true);
+        embedBuilder.addField("Total Track Count", MarkdownUtil.monospace(String.valueOf(array.size())), true);
+        embedBuilder.addField("Total Time", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(array.stream().mapToLong(AudioTrack::getDuration).sum()))), true);
         return Utilities.appendEmbed(embedBuilder);
     }
 
     @Override
-    public void onCommandAutoCompleteInteraction(CommandAutoCompleteInteractionEvent event) {
+    public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
         if ((event.getName().equals("play") || event.getName().equals("queue")) && event.getFocusedOption().getName().equals("song")) {
             ArrayList<String> string = new ArrayList<>();
             for (MusicType type : MusicType.values()) {

@@ -3,7 +3,6 @@ package fun.spmc.radio.music;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
 import net.dv8tion.jda.api.audio.AudioSendHandler;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -26,7 +25,6 @@ public class MusicSendHandler implements AudioSendHandler {
         return this.player.provide(this.frame);
     }
 
-    @Nullable
     @Override
     public ByteBuffer provide20MsAudio() {
         final Buffer buffer = ((Buffer) this.buffer).flip();

@@ -25,9 +25,10 @@ public class Config {
 
                 FileWriter myWriter = new FileWriter(path.toFile());
                 myWriter.write(
-                        "token=null\n" +
-                                "guild_id=null\n" +
-                                "music_channel_id=null");
+                        """
+                                token=null
+                                guild_id=null
+                                music_channel_id=null""");
                 myWriter.close();
             }
 
@@ -40,7 +41,6 @@ public class Config {
             GUILD_ID = prop.getProperty("guild_id");
         } catch (IOException e) {
             System.err.println("Fill in the config!");
-            e.printStackTrace();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
