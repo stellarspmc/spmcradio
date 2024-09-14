@@ -83,7 +83,6 @@ public class EventHandler extends ListenerAdapter {
             case "volume" -> {
                 int volume = Objects.requireNonNull(e.getOption("volume")).getAsInt();
                 if (volume > 100 || volume < 0) volume = 50;
-                if (!Objects.requireNonNull(e.getMember()).hasPermission(Permission.ADMINISTRATOR)) e.deferReply().queue();
                 TrackScheduler.setVolume(volume);
                 e.replyEmbeds(getVolumeEmbed(volume)).queue();
             }
@@ -101,7 +100,7 @@ public class EventHandler extends ListenerAdapter {
     private static @NotNull MessageEmbed getNowPlayingEmbed() {
         AudioTrack playingTrack = TrackScheduler.getPlayingTrack();
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.addField("Now Playing", MarkdownUtil.monospace(playingTrack.getInfo().title), true);
+        embedBuilder.addField("Now Playing", MarkdownUtil.monospace(MarkdownUtil.maskedLink(playingTrack.getInfo().title, playingTrack.getInfo().uri)), true);
         embedBuilder.addField("Author", MarkdownUtil.monospace(playingTrack.getInfo().author), true);
         embedBuilder.addField("Duration", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(playingTrack.getPosition())) + " - " + Utilities.getDuration(Duration.ofMillis(playingTrack.getDuration()))), true);
         return Utilities.appendEmbed(embedBuilder);
@@ -133,24 +132,23 @@ public class EventHandler extends ListenerAdapter {
         embedBuilder.setTitle("Queue List");
 
         ArrayList<AudioTrack> array = TrackScheduler.arrayQueue;
-
         StringBuilder oldString = new StringBuilder();
         StringBuilder string = new StringBuilder();
 
         for (AudioTrack track: array) {
-            oldString
-                    .append(array.indexOf(track) + 1).append(". ").append(track.getInfo().title).append(" - ").append(track.getInfo().author).append("\n")
-                    .append(" - ").append(track.getInfo().author)
-                    .append(" (").append(Utilities.getDuration(Duration.ofMillis(track.getDuration())))
-                    .append(")\n");
+            oldString.append(Objects.equals(track.getIdentifier(), TrackScheduler.getPlayingTrack().getIdentifier()) ? "→ " : "");
+            oldString.append(array.indexOf(track) + 1).append(". ").append(track.getInfo().title).append(" - ").append(track.getInfo().author).append("\n");
+            oldString.append(" - ").append(track.getInfo().author);
+            oldString.append(" (").append(Utilities.getDuration(Duration.ofMillis(track.getDuration()))).append(")\n");
             if (oldString.toString().length() + string.toString().length() > 4096) break;
-            string.append(oldString);
+            string.append(MarkdownUtil.monospace(oldString.toString()));
             oldString.setLength(0);
         }
 
         embedBuilder.setDescription(string.toString());
         embedBuilder.addField("Total Track Count", MarkdownUtil.monospace(String.valueOf(array.size())), true);
         embedBuilder.addField("Total Time", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(array.stream().mapToLong(AudioTrack::getDuration).sum()))), true);
+        embedBuilder.addField("Now Playing", MarkdownUtil.monospace(MarkdownUtil.maskedLink(TrackScheduler.getPlayingTrack().getInfo().title, TrackScheduler.getPlayingTrack().getInfo().uri)), true);
         return Utilities.appendEmbed(embedBuilder);
     }
 
