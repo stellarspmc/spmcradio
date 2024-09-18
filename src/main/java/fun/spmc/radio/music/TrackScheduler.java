@@ -15,7 +15,6 @@ public class TrackScheduler extends AudioEventAdapter {
     private static AudioPlayer player;
     private static BlockingQueue<AudioTrack> queue;
     public static ArrayList<AudioTrack> arrayQueue;
-    //public static ArrayList<AudioTrack> durationQueue;
     AudioTrack lastTrack;
     public static boolean shuffled = false;
 
@@ -65,7 +64,6 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     public static boolean startTrack(AudioTrack track, boolean bool) {
-        //bot.getPresence().setPresence(OnlineStatus.ONLINE, Activity.listening(track.getInfo().title));
         return player.startTrack(track, bool);
     }
 

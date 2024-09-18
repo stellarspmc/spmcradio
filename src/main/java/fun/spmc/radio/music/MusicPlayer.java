@@ -13,6 +13,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fun.spmc.radio.Utilities;
 import fun.spmc.radio.discord.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
@@ -34,15 +36,18 @@ public class MusicPlayer {
         EmbedBuilder embedBuilder = new EmbedBuilder();
 
         if (item instanceof AudioTrack track) {
+            bot.getPresence().setPresence(OnlineStatus.IDLE, Activity.listening(track.getInfo().title));
             embedBuilder.addField("Queuing Track", MarkdownUtil.maskedLink(MarkdownUtil.monospace(track.getInfo().title), track.getInfo().uri), true);
             embedBuilder.addField("Requested By", "<@" + user.getId() + ">", true);
             embedBuilder.addField("Duration", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(track.getDuration()))), true);
         } else if (item instanceof AudioPlaylist playlist) {
             if (playlist.isSearchResult()) {
+                bot.getPresence().setPresence(OnlineStatus.IDLE, Activity.listening(playlist.getSelectedTrack().getInfo().title));
                 embedBuilder.addField("Queuing Track", MarkdownUtil.maskedLink(MarkdownUtil.monospace(playlist.getSelectedTrack().getInfo().title), playlist.getSelectedTrack().getInfo().uri), true);
                 embedBuilder.addField("Requested By", "<@" + user.getId() + ">", true);
                 embedBuilder.addField("Duration", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(playlist.getSelectedTrack().getDuration()))), true);
             } else {
+                bot.getPresence().setPresence(OnlineStatus.ONLINE, Activity.listening(playlist.getName()));
                 embedBuilder.addField("Queuing Playlist", MarkdownUtil.monospace(playlist.getName()), true);
                 embedBuilder.addField("Requested By", "<@" + user.getId() + ">", true);
                 embedBuilder.addField("Duration", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(playlist.getTracks().stream().mapToLong(AudioTrack::getDuration).sum()))), true);
