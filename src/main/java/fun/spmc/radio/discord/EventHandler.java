@@ -100,7 +100,7 @@ public class EventHandler extends ListenerAdapter {
     private static @NotNull MessageEmbed getNowPlayingEmbed() {
         AudioTrack playingTrack = TrackScheduler.getPlayingTrack();
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.addField("Now Playing", MarkdownUtil.monospace(MarkdownUtil.maskedLink(playingTrack.getInfo().title, playingTrack.getInfo().uri)), true);
+        embedBuilder.addField("Now Playing", MarkdownUtil.maskedLink(playingTrack.getInfo().title, playingTrack.getInfo().uri), true);
         embedBuilder.addField("Author", MarkdownUtil.monospace(playingTrack.getInfo().author), true);
         embedBuilder.addField("Duration", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(playingTrack.getPosition())) + " - " + Utilities.getDuration(Duration.ofMillis(playingTrack.getDuration()))), true);
         return Utilities.appendEmbed(embedBuilder);
@@ -137,18 +137,17 @@ public class EventHandler extends ListenerAdapter {
 
         for (AudioTrack track: array) {
             oldString.append(Objects.equals(track.getIdentifier(), TrackScheduler.getPlayingTrack().getIdentifier()) ? "→ " : "");
-            oldString.append(array.indexOf(track) + 1).append(". ").append(track.getInfo().title).append(" - ").append(track.getInfo().author).append("\n");
-            oldString.append(" - ").append(track.getInfo().author);
+            oldString.append(array.indexOf(track) + 1).append(". ").append(track.getInfo().title).append(" - ").append(track.getInfo().author);
             oldString.append(" (").append(Utilities.getDuration(Duration.ofMillis(track.getDuration()))).append(")\n");
             if (oldString.toString().length() + string.toString().length() > 4096) break;
-            string.append(MarkdownUtil.monospace(oldString.toString()));
+            string.append(oldString);
             oldString.setLength(0);
         }
 
         embedBuilder.setDescription(string.toString());
         embedBuilder.addField("Total Track Count", MarkdownUtil.monospace(String.valueOf(array.size())), true);
         embedBuilder.addField("Total Time", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(array.stream().mapToLong(AudioTrack::getDuration).sum()))), true);
-        embedBuilder.addField("Now Playing", MarkdownUtil.monospace(MarkdownUtil.maskedLink(TrackScheduler.getPlayingTrack().getInfo().title, TrackScheduler.getPlayingTrack().getInfo().uri)), true);
+        embedBuilder.addField("Now Playing", MarkdownUtil.maskedLink(TrackScheduler.getPlayingTrack().getInfo().title, TrackScheduler.getPlayingTrack().getInfo().uri), true);
         return Utilities.appendEmbed(embedBuilder);
     }
 

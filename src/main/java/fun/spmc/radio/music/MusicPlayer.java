@@ -43,7 +43,7 @@ public class MusicPlayer {
         } else if (item instanceof AudioPlaylist playlist) {
             if (playlist.isSearchResult()) {
                 bot.getPresence().setPresence(OnlineStatus.IDLE, Activity.listening(playlist.getSelectedTrack().getInfo().title));
-                embedBuilder.addField("Queuing Track", MarkdownUtil.maskedLink(MarkdownUtil.monospace(playlist.getSelectedTrack().getInfo().title), playlist.getSelectedTrack().getInfo().uri), true);
+                embedBuilder.addField("Queuing Track", MarkdownUtil.maskedLink(playlist.getSelectedTrack().getInfo().title, playlist.getSelectedTrack().getInfo().uri), true);
                 embedBuilder.addField("Requested By", "<@" + user.getId() + ">", true);
                 embedBuilder.addField("Duration", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(playlist.getSelectedTrack().getDuration()))), true);
             } else {
