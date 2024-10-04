@@ -10,8 +10,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioItem;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import dev.lavalink.youtube.clients.Music;
-import dev.lavalink.youtube.clients.Web;
+import dev.lavalink.youtube.clients.*;
 import fun.spmc.radio.Utilities;
 import fun.spmc.radio.discord.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -66,7 +65,7 @@ public class MusicPlayer {
     private static final AudioPlayer player = musicManager.player;
 
     public static void playMusic() {
-        manager.registerSourceManager(new dev.lavalink.youtube.YoutubeAudioSourceManager(true, new Web(), new Music()));
+        manager.registerSourceManager(new dev.lavalink.youtube.YoutubeAudioSourceManager(true, new WebWithThumbnail(), new AndroidMusicWithThumbnail(), new TvHtml5EmbeddedWithThumbnail(), new MusicWithThumbnail()));
 
         VoiceChannel channel = bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID);
         assert guild != null;
@@ -136,6 +135,7 @@ public class MusicPlayer {
                 embedBuilder.setTitle("Error, please report this to the admins");
                 embedBuilder.setDescription(exception.getMessage());
                 if (event != null) event.replyEmbeds(Utilities.appendEmbed(embedBuilder)).queue();
+                System.out.println(exception.getMessage());
             }
         });
     }
