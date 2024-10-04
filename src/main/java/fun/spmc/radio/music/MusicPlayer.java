@@ -10,6 +10,8 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioItem;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import dev.lavalink.youtube.clients.Music;
+import dev.lavalink.youtube.clients.Web;
 import fun.spmc.radio.Utilities;
 import fun.spmc.radio.discord.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -64,7 +66,7 @@ public class MusicPlayer {
     private static final AudioPlayer player = musicManager.player;
 
     public static void playMusic() {
-        manager.registerSourceManager(new dev.lavalink.youtube.YoutubeAudioSourceManager());
+        manager.registerSourceManager(new dev.lavalink.youtube.YoutubeAudioSourceManager(true, new Web(), new Music()));
 
         VoiceChannel channel = bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID);
         assert guild != null;
@@ -111,8 +113,8 @@ public class MusicPlayer {
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
                 if (playlist.isSearchResult()) {
-                    musicManager.scheduler.queue(playlist.getSelectedTrack());
-                    if (event != null) event.replyEmbeds(createEmbed(playlist.getSelectedTrack(), event.getUser())).queue();
+                    musicManager.scheduler.queue(playlist.getTracks().get(0));
+                    if (event != null) event.replyEmbeds(createEmbed(playlist.getTracks().get(0), event.getUser())).queue();
                 }
                 else {
                     playlist.getTracks().forEach(musicManager.scheduler::queue);

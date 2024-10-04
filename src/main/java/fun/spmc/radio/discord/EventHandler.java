@@ -43,7 +43,7 @@ public class EventHandler extends ListenerAdapter {
                         .addOption(OptionType.STRING, "song", "The song you want to queue.", true, true),
                 Commands.slash("nowplaying", "Check what song is playing!"),
                 Commands.slash("queuelist", "Get the queue list of songs!"),
-                Commands.slash("volume", "Only for admins.")
+                Commands.slash("volume", "Change the volume of the bot.")
                         .addOption(OptionType.INTEGER, "volume", "Volume", true, false),
                 Commands.slash("shuffle", "Shuffles the queue!"),
                 Commands.slash("skip", "Skip the song playing.")
