@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ml.spmc</groupId>
   <artifactId>SPMCRadio</artifactId>
-  <version>2.5.5a</version>
+  <version>2.5.6</version>
   <build>
     <plugins>
       <plugin>
