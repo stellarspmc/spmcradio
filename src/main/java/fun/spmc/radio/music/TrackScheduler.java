@@ -35,10 +35,9 @@ public class TrackScheduler extends AudioEventAdapter {
         AudioTrack playing = player.getPlayingTrack();
         ArrayList<AudioTrack> array = arrayQueue;
 
-        array.remove(playing);
-        queue.removeAll(array);
+        queue.clear();
         Collections.shuffle(array);
-
+        array.remove(playing);
         array.forEach(track -> queue.offer(track.makeClone()));
         array.add(0, playing);
 
