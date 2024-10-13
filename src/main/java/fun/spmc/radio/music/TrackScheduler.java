@@ -7,6 +7,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -33,11 +34,14 @@ public class TrackScheduler extends AudioEventAdapter {
 
     public static void shuffle() {
         AudioTrack playing = player.getPlayingTrack();
-        ArrayList<AudioTrack> array = arrayQueue;
+        ArrayList<AudioTrack> tempArray = arrayQueue;
+        ArrayList<AudioTrack> array = new ArrayList<>();
 
         queue.clear();
-        Collections.shuffle(array);
-        array.remove(playing);
+        Collections.shuffle(tempArray);
+        tempArray.forEach(track -> {
+            if (!Objects.equals(track.getInfo().uri, playing.getInfo().uri)) array.add(track.makeClone());
+        });
         array.forEach(track -> queue.offer(track.makeClone()));
         array.add(0, playing);
 
