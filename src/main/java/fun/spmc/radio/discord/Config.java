@@ -1,47 +1,44 @@
 package fun.spmc.radio.discord;
 
-import fun.spmc.radio.SPMCRadio;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
 
 public class Config {
+    private static final Logger log = LoggerFactory.getLogger(Config.class);
     public static String BOT_TOKEN;
     public static String MUSIC_CHANNEL_ID;
     public static String GUILD_ID;
-
+    public static String REFRESH_TOKEN;
 
     // ran when start
     public static void checkConfigs() {
+        Configurations configs = new Configurations();
+        File configFile = new File("config.properties");
         try {
-            Path path = Paths.get(new File(SPMCRadio.class.getProtectionDomain().getCodeSource().getLocation()
-                    .toURI()).getPath()).getParent().resolve("config.properties");
-            if (!Files.exists(path)) {
-                Files.createFile(path);
+            if (!configFile.exists()) configFile.createNewFile();
+            FileBasedConfigurationBuilder<PropertiesConfiguration> builder = configs.propertiesBuilder(configFile);
+            Configuration config = builder.getConfiguration();
 
-                FileWriter myWriter = new FileWriter(path.toFile());
-                myWriter.write(
-                        """
-                                token=null
-                                guild_id=null
-                                music_channel_id=null""");
-                myWriter.close();
+            BOT_TOKEN = config.getString("token");
+            MUSIC_CHANNEL_ID = config.getString("music.channel.id");
+            GUILD_ID = config.getString("guild.id");
+            REFRESH_TOKEN = config.getString("refresh.token");
+            if (BOT_TOKEN == null || MUSIC_CHANNEL_ID == null || GUILD_ID == null) {
+                config.addProperty("token", "");
+                config.addProperty("music.channel.id", "");
+                config.addProperty("guild.id", "");
+                config.addProperty("refresh.token", "");
+                builder.save();
+                log.error("The bot token and music channel id are not set.");
             }
-
-            FileInputStream propsInput = new FileInputStream(path.toFile());
-            Properties prop = new Properties();
-            prop.load(propsInput);
-
-            BOT_TOKEN = prop.getProperty("token");
-            MUSIC_CHANNEL_ID = prop.getProperty("music_channel_id");
-            GUILD_ID = prop.getProperty("guild_id");
-        } catch (IOException e) {
-            System.err.println("Fill in the config!");
-        } catch (URISyntaxException e) {
+        } catch (ConfigurationException | IOException e) {
             throw new RuntimeException(e);
         }
     }

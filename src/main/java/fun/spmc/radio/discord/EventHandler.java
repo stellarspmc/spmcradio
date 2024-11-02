@@ -15,6 +15,8 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 import org.jetbrains.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.net.URL;
@@ -23,7 +25,7 @@ import java.util.*;
 import java.util.stream.*;
 
 public class EventHandler extends ListenerAdapter {
-
+    private static final Logger log = LoggerFactory.getLogger(EventHandler.class);
     private static boolean isValidURL(String urlString) {
         try {
             URL url = new URL(urlString);
@@ -166,7 +168,7 @@ public class EventHandler extends ListenerAdapter {
                         .collect(Collectors.toList());
                 event.replyChoices(options).queue();
             } catch (ClassCastException e) {
-                System.err.println(e.getMessage());
+                log.error(e.getMessage());
             }
         }
     }
