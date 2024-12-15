@@ -12,7 +12,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import dev.lavalink.youtube.clients.*;
 import fun.spmc.radio.Utilities;
-import fun.spmc.radio.discord.Config;
+import fun.spmc.radio.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
@@ -67,8 +67,8 @@ public class MusicPlayer {
     private static final AudioPlayer player = musicManager.player;
 
     public static void playMusic() {
-        YoutubeAudioSourceManager source = new YoutubeAudioSourceManager(true, new TvHtml5EmbeddedWithThumbnail(), new AndroidMusicWithThumbnail(), new MusicWithThumbnail());
-        source.useOauth2(Config.REFRESH_TOKEN, !Config.REFRESH_TOKEN.isEmpty());
+        YoutubeAudioSourceManager source = new YoutubeAudioSourceManager(true, new TvHtml5EmbeddedWithThumbnail(), new MusicWithThumbnail());
+        Web.setPoTokenAndVisitorData(Config.PO_TOKEN, Config.VISITOR_DATA);
         manager.registerSourceManager(source);
 
         VoiceChannel channel = bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID);

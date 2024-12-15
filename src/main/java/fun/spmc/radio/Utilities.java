@@ -21,7 +21,7 @@ public class Utilities {
     public static @NotNull MessageEmbed appendEmbed(@NotNull EmbedBuilder builder) {
         builder.setImage("https://media1.tenor.com/images/b3b66ace65470cba241193b62366dfee/tenor.gif");
         builder.setColor(new Color(2600572));
-        builder.setFooter("SPMCRadio 2.5.7");
+        builder.setFooter("SPMCRadio 2.6");
         builder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
         return builder.build();
     }

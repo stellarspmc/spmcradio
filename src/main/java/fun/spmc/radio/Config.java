@@ -1,21 +1,19 @@
-package fun.spmc.radio.discord;
+package fun.spmc.radio;
 
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
 public class Config {
-    private static final Logger log = LoggerFactory.getLogger(Config.class);
     public static String BOT_TOKEN;
     public static String MUSIC_CHANNEL_ID;
     public static String GUILD_ID;
-    public static String REFRESH_TOKEN;
+    public static String PO_TOKEN;
+    public static String VISITOR_DATA;
 
     // ran when start
     public static void checkConfigs() {
@@ -29,14 +27,21 @@ public class Config {
             BOT_TOKEN = config.getString("token");
             MUSIC_CHANNEL_ID = config.getString("music.channel.id");
             GUILD_ID = config.getString("guild.id");
-            REFRESH_TOKEN = config.getString("refresh.token");
+            PO_TOKEN = config.getString("po.token");
+            VISITOR_DATA = config.getString("visitor.data");
             if (BOT_TOKEN == null || MUSIC_CHANNEL_ID == null || GUILD_ID == null) {
                 config.addProperty("token", "");
                 config.addProperty("music.channel.id", "");
                 config.addProperty("guild.id", "");
-                config.addProperty("refresh.token", "");
                 builder.save();
-                log.error("The bot token and music channel id are not set.");
+                throw new RuntimeException("The bot token and music channel id are not set.");
+            }
+
+            if (PO_TOKEN == null || VISITOR_DATA == null) {
+                config.addProperty("po.token", "");
+                config.addProperty("visitor.data", "");
+                builder.save();
+                throw new RuntimeException("Please setup Proof of Origin tokens.");
             }
         } catch (ConfigurationException | IOException e) {
             throw new RuntimeException(e);
