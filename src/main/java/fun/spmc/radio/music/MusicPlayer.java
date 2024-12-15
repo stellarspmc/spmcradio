@@ -68,7 +68,7 @@ public class MusicPlayer {
 
     public static void playMusic() {
         YoutubeAudioSourceManager source = new YoutubeAudioSourceManager(true, new TvHtml5EmbeddedWithThumbnail(), new AndroidMusicWithThumbnail(), new MusicWithThumbnail());
-        source.useOauth2(Config.REFRESH_TOKEN, !Config.REFRESH_TOKEN.isEmpty());
+        source.useOauth2(Config.REFRESH_TOKEN, !(Config.REFRESH_TOKEN == null));
         manager.registerSourceManager(source);
 
         VoiceChannel channel = bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID);
