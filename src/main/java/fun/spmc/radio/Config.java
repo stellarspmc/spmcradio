@@ -1,4 +1,4 @@
-package fun.spmc.radio.discord;
+package fun.spmc.radio;
 
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
