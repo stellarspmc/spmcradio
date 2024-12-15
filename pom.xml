@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>fun.spmc</groupId>
   <artifactId>SPMCRadio</artifactId>
-  <version>2.5.7a</version>
+  <version>2.6</version>
   <build>
     <plugins>
       <plugin>
@@ -80,7 +80,7 @@
     <dependency>
       <groupId>commons-beanutils</groupId>
       <artifactId>commons-beanutils</artifactId>
-      <version>1.9.3</version>
+      <version>1.9.4</version>
     </dependency>
   </dependencies>
 
