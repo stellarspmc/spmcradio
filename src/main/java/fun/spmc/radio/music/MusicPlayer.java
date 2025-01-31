@@ -11,8 +11,9 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import dev.lavalink.youtube.clients.*;
+import fun.spmc.radio.Config;
 import fun.spmc.radio.Utilities;
-import fun.spmc.radio.discord.Config;
+import fun.spmc.radio.discord.EventHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
@@ -24,17 +25,13 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.time.Duration;
 import java.util.*;
 
 import static fun.spmc.radio.SPMCRadio.bot;
-
 public class MusicPlayer {
-    private static final Logger log = LoggerFactory.getLogger(MusicPlayer.class);
     private static @NotNull MessageEmbed createEmbed(AudioItem item, User user) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
 
@@ -67,12 +64,13 @@ public class MusicPlayer {
     private static final AudioPlayer player = musicManager.player;
 
     public static void playMusic() {
-        YoutubeAudioSourceManager source = new YoutubeAudioSourceManager(true, new TvHtml5EmbeddedWithThumbnail(), new AndroidMusicWithThumbnail(), new MusicWithThumbnail());
+        YoutubeAudioSourceManager source = new YoutubeAudioSourceManager(true, new TvHtml5Embedded(), new WebEmbedded(), new Music());
         source.useOauth2(Config.REFRESH_TOKEN, !(Config.REFRESH_TOKEN == null));
         manager.registerSourceManager(source);
 
         VoiceChannel channel = bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID);
         assert guild != null;
+        assert channel != null;
         final AudioManager manager2 = guild.getAudioManager();
         manager2.setSendingHandler(musicManager.getSendHandler());
         if (!manager2.isConnected()) {
@@ -80,10 +78,13 @@ public class MusicPlayer {
             AudioSourceManagers.registerRemoteSources(manager);
             AudioSourceManagers.registerLocalSource(manager);
             manager2.setSelfDeafened(true);
-            player.setVolume(100);
+            player.setVolume(50);
         }
+
+        manager2.setSelfDeafened(true);
         if (player.isPaused()) player.setPaused(false);
         if (player.getVolume() == 0) player.setVolume(50);
+        EventHandler.usersInCall.addAll(channel.getMembers());
         loadSong(MusicType.DEFAULT.getUrl(), null);
     }
 
@@ -106,7 +107,6 @@ public class MusicPlayer {
 
     public static void loadSong(String url, SlashCommandInteractionEvent event) {
         manager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
-
             @Override
             public void trackLoaded(AudioTrack track) {
                 musicManager.scheduler.queue(track);
@@ -139,7 +139,7 @@ public class MusicPlayer {
                 embedBuilder.setTitle("Error, please report this to the admins");
                 embedBuilder.setDescription(exception.getMessage());
                 if (event != null) event.replyEmbeds(Utilities.appendEmbed(embedBuilder)).queue();
-                log.error(exception.getMessage());
+                //log.error(exception.getMessage());
             }
         });
     }

@@ -2,12 +2,18 @@ package fun.spmc.radio.discord;
 
 import com.sedmelluq.discord.lavaplayer.track.*;
 
+import fun.spmc.radio.Config;
 import fun.spmc.radio.Utilities;
+import fun.spmc.radio.features.SPMCWrapped;
+import fun.spmc.radio.features.SongToTitleCacher;
 import fun.spmc.radio.music.*;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.command.*;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.*;
@@ -22,10 +28,14 @@ import java.awt.*;
 import java.net.URL;
 import java.time.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.*;
+
+import static fun.spmc.radio.SPMCRadio.bot;
 
 public class EventHandler extends ListenerAdapter {
     private static final Logger log = LoggerFactory.getLogger(EventHandler.class);
+    public static final ArrayList<Member> usersInCall = new ArrayList<>();
     private static boolean isValidURL(String urlString) {
         try {
             URL url = new URL(urlString);
@@ -48,7 +58,9 @@ public class EventHandler extends ListenerAdapter {
                 Commands.slash("volume", "Change the volume of the bot.")
                         .addOption(OptionType.INTEGER, "volume", "Volume", true, false),
                 Commands.slash("shuffle", "Shuffles the queue!"),
-                Commands.slash("skip", "Skip the song playing.")
+                Commands.slash("skip", "Skip the song playing."),
+                Commands.slash("spmcwrapped", "How long have you been here...")
+                        .addOption(OptionType.USER, "user", "Who do you want to check? Leave blank if yourself", false)
         ).queue();
     }
     
@@ -83,7 +95,7 @@ public class EventHandler extends ListenerAdapter {
             case "queuelist" -> e.replyEmbeds(getQueueListEmbed()).queue();
             case "volume" -> {
                 int volume = Objects.requireNonNull(e.getOption("volume")).getAsInt();
-                if (volume > 100 || volume < 0) volume = 50;
+                volume = volume > 100 || volume < 0 ? 50 : volume;
                 TrackScheduler.setVolume(volume);
                 e.replyEmbeds(getVolumeEmbed(volume)).queue();
             }
@@ -95,6 +107,7 @@ public class EventHandler extends ListenerAdapter {
                 TrackScheduler.skipTrack();
                 e.replyEmbeds(getSkipEmbed()).queue();
             }
+            case "spmcwrapped" -> e.replyEmbeds(getTotalTimeEmbed(e.getOption("user") != null ? Objects.requireNonNull(e.getOption("user")).getAsUser() : e.getUser())).queue();
         }
     }
 
@@ -119,6 +132,23 @@ public class EventHandler extends ListenerAdapter {
         embedBuilder.setDescription("Shuffled queue.");
         embedBuilder.setColor(new Color(2600572));
         return embedBuilder.build();
+    }
+
+    private static @NotNull MessageEmbed getTotalTimeEmbed(User user) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle(user.getName() + "'s Top 5 Songs");
+        StringBuilder string = new StringBuilder();
+        List<Map.Entry<String, Long>> topSongs = SPMCWrapped.topFiveSongs(user);
+        for (Map.Entry<String, Long> entry: topSongs) {
+            string.append(SongToTitleCacher.fetchSongData(entry.getKey()))
+                    .append(" (")
+                    .append(Utilities.getDuration(Duration.ofMillis(entry.getValue())))
+                    .append(")\n");
+        }
+
+        embedBuilder.setDescription(string.toString());
+        embedBuilder.addField("Total Playtime", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(SPMCWrapped.fetchPlaytime(user)))), true);
+        return Utilities.appendEmbed(embedBuilder);
     }
 
     private static @NotNull MessageEmbed getSkipEmbed() {
@@ -171,5 +201,11 @@ public class EventHandler extends ListenerAdapter {
                 log.error(e.getMessage());
             }
         }
+    }
+
+    @Override
+    public void onGuildVoiceUpdate(GuildVoiceUpdateEvent event) {
+        if (Objects.equals(event.getChannelJoined(), bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID))) usersInCall.add(event.getEntity());
+        else if (Objects.equals(event.getChannelLeft(), bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID))) usersInCall.remove(event.getEntity());
     }
 }

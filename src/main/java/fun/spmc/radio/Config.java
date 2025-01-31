@@ -1,12 +1,10 @@
-package fun.spmc.radio.discord;
+package fun.spmc.radio;
 
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
@@ -17,7 +15,7 @@ public class Config {
     public static String REFRESH_TOKEN;
 
     // ran when start
-    public static void checkConfigs() {
+    public static void init() {
         Configurations configs = new Configurations();
         File configFile = new File("config.properties");
         try {

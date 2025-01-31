@@ -4,6 +4,9 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import fun.spmc.radio.discord.EventHandler;
+import fun.spmc.radio.features.SPMCWrapped;
+import fun.spmc.radio.features.SongToTitleCacher;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,6 +59,10 @@ public class TrackScheduler extends AudioEventAdapter {
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         this.lastTrack = track;
+        EventHandler.usersInCall.forEach(a -> SPMCWrapped.addUserData(a.getUser(), track));
+        SPMCWrapped.save();
+
+        SongToTitleCacher.addSongData(track);
 
         if (endReason.mayStartNext || endReason == AudioTrackEndReason.CLEANUP || endReason == AudioTrackEndReason.STOPPED) {
             AudioTrack track2 = queue.poll();
