@@ -7,12 +7,13 @@ The only reason for it to exist is that Groovy was shut down.
 - config?
 - cool embeds?
 - default selection of Chinese, Japanese and English songs lol
+- cool wrapper thing lol
 
 ## Testing Server
 [Join here](https://dc.spmc.fun)
 
 ## Stable Build
-The now stable build is 2.5.7a available for download at [here](https://github.com/stellarspmc/spmcradio/releases/tag/2.5.7a).
+The now stable build is v3 / 3.0 available for download at [here](https://github.com/stellarspmc/spmcradio/releases/tag/2.5.7a).
 
 ## NOTE:
 YouTube has added a check for bots so they don't spam the YouTube rate-limit.
