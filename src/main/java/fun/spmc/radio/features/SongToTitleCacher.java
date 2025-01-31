@@ -18,7 +18,7 @@ public class SongToTitleCacher {
     private static JSONObject file = new JSONObject();
 
     public static void init() {
-        cache = new File("song_title.json");
+        cache = new File("config/song_title.json");
         try {
             if (!cache.exists()) cache.createNewFile();
             else {

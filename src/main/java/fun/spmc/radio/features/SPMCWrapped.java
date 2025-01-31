@@ -18,7 +18,7 @@ public class SPMCWrapped {
     private static JSONObject file = new JSONObject();
 
     public static void init() {
-        wrappedFile = new File("wrapped.json");
+        wrappedFile = new File("config/wrapped.json");
         try {
             if (!wrappedFile.exists()) wrappedFile.createNewFile();
             else {

@@ -9,9 +9,14 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 public class SPMCRadio {
     public static JDA bot;
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
+        Files.createDirectories(Paths.get("config"));
         Config.init();
         SPMCWrapped.init();
         SongToTitleCacher.init();

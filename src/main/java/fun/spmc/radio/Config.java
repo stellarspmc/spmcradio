@@ -17,7 +17,7 @@ public class Config {
     // ran when start
     public static void init() {
         Configurations configs = new Configurations();
-        File configFile = new File("config.properties");
+        File configFile = new File("config/config.properties");
         try {
             if (!configFile.exists()) configFile.createNewFile();
             FileBasedConfigurationBuilder<PropertiesConfiguration> builder = configs.propertiesBuilder(configFile);
