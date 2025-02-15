@@ -16,10 +16,7 @@ import fun.spmc.radio.Utilities;
 import fun.spmc.radio.discord.EventHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.OnlineStatus;
-import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.managers.AudioManager;
@@ -84,7 +81,7 @@ public class MusicPlayer {
         manager2.setSelfDeafened(true);
         if (player.isPaused()) player.setPaused(false);
         if (player.getVolume() == 0) player.setVolume(50);
-        EventHandler.usersInCall.addAll(channel.getMembers());
+        Utilities.hashMapPutAll(EventHandler.usersInCall, (ArrayList<Member>) channel.getMembers(), 0L);
         loadSong(MusicType.DEFAULT.getUrl(), null);
     }
 

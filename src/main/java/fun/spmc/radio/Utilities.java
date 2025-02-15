@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Utilities {
@@ -30,5 +31,9 @@ public class Utilities {
 
     public static void hashMapSetAll(HashMap<Member, Long> hashMap, Long value) {
         hashMap.forEach((k, v) -> hashMap.put(k, value));
+    }
+
+    public static void hashMapPutAll(HashMap<Member, Long> hashMap, ArrayList<Member> members, Long value) {
+        members.forEach((k) -> hashMap.put(k, value));
     }
 }
