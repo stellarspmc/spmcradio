@@ -30,9 +30,9 @@ public class SPMCWrapped {
         }
     }
 
-    public static void addUserData(User user, AudioTrack track) {
+    public static void addUserData(User user, AudioTrack track, long joinDuration) {
         HashMap<String, Long> userSongList = new HashMap<>(fetchUserSongList(user));
-        long duration = track.getPosition();
+        long duration = track.getPosition() - joinDuration;
         if (duration == 0) return;
         if (user.isBot()) return;
 

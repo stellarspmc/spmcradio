@@ -35,7 +35,7 @@ import static fun.spmc.radio.SPMCRadio.bot;
 
 public class EventHandler extends ListenerAdapter {
     private static final Logger log = LoggerFactory.getLogger(EventHandler.class);
-    public static final ArrayList<Member> usersInCall = new ArrayList<>();
+    public static final HashMap<Member, Long> usersInCall = new HashMap<>();
     private static boolean isValidURL(String urlString) {
         try {
             URL url = new URL(urlString);
@@ -139,11 +139,14 @@ public class EventHandler extends ListenerAdapter {
         embedBuilder.setTitle(user.getName() + "'s Top 5 Songs");
         StringBuilder string = new StringBuilder();
         List<Map.Entry<String, Long>> topSongs = SPMCWrapped.topFiveSongs(user);
+        int i = 1;
         for (Map.Entry<String, Long> entry: topSongs) {
-            string.append(SongToTitleCacher.fetchSongData(entry.getKey()))
+            string.append(i).append(". ")
+                    .append(SongToTitleCacher.fetchSongData(entry.getKey()))
                     .append(" (")
                     .append(Utilities.getDuration(Duration.ofMillis(entry.getValue())))
                     .append(")\n");
+            i++;
         }
 
         embedBuilder.setDescription(string.toString());
@@ -205,7 +208,13 @@ public class EventHandler extends ListenerAdapter {
 
     @Override
     public void onGuildVoiceUpdate(GuildVoiceUpdateEvent event) {
-        if (Objects.equals(event.getChannelJoined(), bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID))) usersInCall.add(event.getEntity());
-        else if (Objects.equals(event.getChannelLeft(), bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID))) usersInCall.remove(event.getEntity());
+        AudioTrack playingTrack = TrackScheduler.getPlayingTrack();
+        long durationNow = playingTrack.getDuration();
+
+        if (Objects.equals(event.getChannelJoined(), bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID))) usersInCall.put(event.getEntity(), durationNow);
+        else if (Objects.equals(event.getChannelLeft(), bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID))) {
+            SPMCWrapped.addUserData(event.getEntity().getUser(), playingTrack, usersInCall.get(event.getEntity()));
+            usersInCall.remove(event.getEntity());
+        }
     }
 }

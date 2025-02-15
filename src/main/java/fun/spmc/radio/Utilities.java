@@ -1,12 +1,14 @@
 package fun.spmc.radio;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 
 public class Utilities {
     public static @NotNull String getDuration(@NotNull Duration d) {
@@ -24,5 +26,9 @@ public class Utilities {
         builder.setFooter("SPMCRadio v3");
         builder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
         return builder.build();
+    }
+
+    public static void hashMapSetAll(HashMap<Member, Long> hashMap, Long value) {
+        hashMap.forEach((k, v) -> hashMap.put(k, value));
     }
 }
