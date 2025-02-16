@@ -13,7 +13,7 @@ The only reason for it to exist is that Groovy was shut down.
 [Join here](https://dc.spmc.fun)
 
 ## Stable Build
-The now stable build is v3 / 3.0 available for download at [here](https://github.com/stellarspmc/spmcradio/releases/tag/3.0.0).
+The now stable build is v3.12 / 3.1.2 available for download at [here](https://github.com/stellarspmc/spmcradio/releases/tag/3.1.2).
 
 Docker version: https://hub.docker.com/repository/docker/tcfplayz/musicspmc/general
 
