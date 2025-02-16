@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>fun.spmc</groupId>
   <artifactId>SPMCRadio</artifactId>
-  <version>v3</version>
+  <version>v3.1</version>
   <build>
     <plugins>
       <plugin>
@@ -64,12 +64,12 @@
     <dependency>
       <groupId>dev.arbjerg</groupId>
       <artifactId>lavaplayer</artifactId>
-      <version>2.2.2</version>
+      <version>2.2.3</version>
     </dependency>
     <dependency>
       <groupId>dev.lavalink.youtube</groupId>
       <artifactId>v2</artifactId>
-      <version>aa35b841ec3ad4f4865e4bcd4d1e6c539b822687-SNAPSHOT</version>
+      <version>1.11.4</version>
     </dependency>
 
     <dependency>
@@ -103,6 +103,11 @@
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
       <version>4.29.3</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.18.0</version>
     </dependency>
   </dependencies>
 
