@@ -8,11 +8,9 @@ import fun.spmc.radio.Utilities;
 import fun.spmc.radio.discord.EventHandler;
 import fun.spmc.radio.features.SPMCWrapped;
 import fun.spmc.radio.features.SongToTitleCacher;
-import jdk.jfr.Event;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

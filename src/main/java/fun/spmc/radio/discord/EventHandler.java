@@ -207,13 +207,15 @@ public class EventHandler extends ListenerAdapter {
     }
 
     @Override
-    public void onGuildVoiceUpdate(GuildVoiceUpdateEvent event) {
-        AudioTrack playingTrack = TrackScheduler.getPlayingTrack();
-        long durationNow = playingTrack.getDuration();
+    public void onGuildVoiceUpdate(@NotNull GuildVoiceUpdateEvent event) {
+        long durationNow = 0;
+        if (TrackScheduler.getPlayingTrack() != null) durationNow = TrackScheduler.getPlayingTrack().getPosition();
 
         if (Objects.equals(event.getChannelJoined(), bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID))) usersInCall.put(event.getEntity(), durationNow);
         else if (Objects.equals(event.getChannelLeft(), bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID))) {
-            SPMCWrapped.addUserData(event.getEntity().getUser(), playingTrack, usersInCall.get(event.getEntity()));
+            System.out.println(usersInCall);
+            SPMCWrapped.addUserData(event.getEntity().getUser(), TrackScheduler.getPlayingTrack(), usersInCall.get(event.getEntity()));
+            SPMCWrapped.save();
             usersInCall.remove(event.getEntity());
         }
     }

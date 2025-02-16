@@ -4,12 +4,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.awt.*;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Utilities {
     public static @NotNull String getDuration(@NotNull Duration d) {
@@ -24,7 +25,7 @@ public class Utilities {
     public static @NotNull MessageEmbed appendEmbed(@NotNull EmbedBuilder builder) {
         builder.setImage("https://media1.tenor.com/images/b3b66ace65470cba241193b62366dfee/tenor.gif");
         builder.setColor(new Color(2600572));
-        builder.setFooter("SPMCRadio v3.1");
+        builder.setFooter("SPMCRadio v3.12");
         builder.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis()));
         return builder.build();
     }
@@ -33,7 +34,7 @@ public class Utilities {
         hashMap.forEach((k, v) -> hashMap.put(k, value));
     }
 
-    public static void hashMapPutAll(HashMap<Member, Long> hashMap, ArrayList<Member> members, Long value) {
+    public static void hashMapPutAll(HashMap<Member, Long> hashMap, @Unmodifiable List<Member> members, Long value) {
         members.forEach((k) -> hashMap.put(k, value));
     }
 }

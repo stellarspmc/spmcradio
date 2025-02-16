@@ -81,8 +81,7 @@ public class MusicPlayer {
         manager2.setSelfDeafened(true);
         if (player.isPaused()) player.setPaused(false);
         if (player.getVolume() == 0) player.setVolume(50);
-        Utilities.hashMapPutAll(EventHandler.usersInCall, (ArrayList<Member>) channel.getMembers(), 0L);
-        loadSong(MusicType.DEFAULT.getUrl(), null);
+        Utilities.hashMapPutAll(EventHandler.usersInCall, channel.getMembers(), 0L);
     }
 
     public static void loopQueue() {
