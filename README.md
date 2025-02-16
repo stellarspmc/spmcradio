@@ -15,6 +15,8 @@ The only reason for it to exist is that Groovy was shut down.
 ## Stable Build
 The now stable build is v3 / 3.0 available for download at [here](https://github.com/stellarspmc/spmcradio/releases/tag/3.0.0).
 
+Docker version: https://hub.docker.com/repository/docker/tcfplayz/musicspmc/general
+
 ## NOTE:
 YouTube has added a check for bots so they don't spam the YouTube rate-limit.
 You have to manually input the OAuth code during launch.
