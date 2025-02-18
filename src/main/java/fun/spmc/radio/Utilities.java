@@ -14,9 +14,9 @@ import java.util.List;
 
 public class Utilities {
     public static @NotNull String getDuration(@NotNull Duration d) {
-        int m = d.toMinutesPart();
-        int s = d.toSecondsPart();
-        int h = d.toHoursPart();
+        long m = d.toMinutesPart();
+        long s = d.toSecondsPart();
+        long h = d.toHours();
 
         if (h == 0) return String.format("%02d:%02d", m, s);
         else return String.format("%02d:%02d:%02d", h, m, s);

@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>fun.spmc</groupId>
   <artifactId>SPMCRadio</artifactId>
-  <version>v3.12</version>
+  <version>v3.13</version>
   <build>
     <plugins>
       <plugin>
