@@ -61,7 +61,7 @@ public class MusicPlayer {
     private static final AudioPlayer player = musicManager.player;
 
     public static void playMusic() {
-        YoutubeAudioSourceManager source = new YoutubeAudioSourceManager(true, new AndroidMusic(), new Music(), new TvHtml5Embedded(), new Web(), new WebEmbedded());
+        YoutubeAudioSourceManager source = new YoutubeAudioSourceManager(true, new Music(), new TvHtml5Embedded(), new Web());
         source.useOauth2(Config.REFRESH_TOKEN, (Config.REFRESH_TOKEN != null));
         manager.registerSourceManager(source);
 
