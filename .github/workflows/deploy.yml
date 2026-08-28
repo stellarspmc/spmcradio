@@ -16,9 +16,11 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: maven
+      - run: mvn verify
 
       - name: Build with Gradle
-        run: ./mvnw package
+        run: mvn package
 
       - name: Prepare JAR File
         run: mv target/SPMCRadio-*.jar bot.jar
