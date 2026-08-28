@@ -72,7 +72,7 @@ public class MusicPlayer {
     public static void playMusic() {
         YoutubeSourceOptions options = new YoutubeSourceOptions()
                 .setRemoteCipher("https://cipher.kikkia.dev/", "", "");
-        YoutubeAudioSourceManager source = new YoutubeAudioSourceManager(options, new Music(), new TvHtml5Simply(), new Web(), new AndroidVr(), new Tv());
+        YoutubeAudioSourceManager source = new YoutubeAudioSourceManager(options, new Music(), new TvHtml5Simply(), new MWeb(), new AndroidVr(), new Tv());
         source.useOauth2(Config.REFRESH_TOKEN, (Config.REFRESH_TOKEN != null));
         manager.registerSourceManager(source);
 
