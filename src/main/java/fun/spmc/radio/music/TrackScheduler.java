@@ -53,10 +53,6 @@ public class TrackScheduler extends AudioEventAdapter {
         arrayQueue = array;
     }
 
-    public static void skipTrack() {
-        player.stopTrack();
-    }
-
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         this.lastTrack = track;
@@ -68,15 +64,8 @@ public class TrackScheduler extends AudioEventAdapter {
 
         if (endReason.mayStartNext || endReason == AudioTrackEndReason.CLEANUP || endReason == AudioTrackEndReason.STOPPED) {
             AudioTrack track2 = queue.poll();
-            if (track2 != null) {
-                boolean bool = startTrack(track2.makeClone(), false);
-                if (!bool) MusicPlayer.loopQueue();
-            } else MusicPlayer.loopQueue();
+            if (track2 == null || !startTrack(track2.makeClone(), false)) MusicPlayer.loopQueue();
         }
-    }
-
-    public static boolean startTrack(AudioTrack track, boolean bool) {
-        return player.startTrack(track, bool);
     }
 
     public void clearQueue() {
@@ -84,11 +73,8 @@ public class TrackScheduler extends AudioEventAdapter {
         arrayQueue.clear();
     }
 
-    public static AudioTrack getPlayingTrack() {
-        return player.getPlayingTrack();
-    }
-
-    public static void setVolume(int volume) {
-        player.setVolume(volume);
-    }
+    public static boolean startTrack(AudioTrack track, boolean bool) { return player.startTrack(track, bool); }
+    public static AudioTrack getPlayingTrack() { return player.getPlayingTrack(); }
+    public static void skipTrack() { player.stopTrack(); }
+    public static void setVolume(int volume) { player.setVolume(volume); }
 }

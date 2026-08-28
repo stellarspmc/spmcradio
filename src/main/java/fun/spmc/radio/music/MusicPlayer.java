@@ -9,13 +9,14 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioItem;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
+import dev.lavalink.youtube.YoutubeSourceOptions;
 import dev.lavalink.youtube.clients.*;
 import fun.spmc.radio.Config;
 import fun.spmc.radio.Utilities;
 import fun.spmc.radio.discord.EventHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -28,30 +29,38 @@ import java.time.Duration;
 import java.util.*;
 
 import static fun.spmc.radio.SPMCRadio.bot;
+
 public class MusicPlayer {
     private static @NotNull MessageEmbed createEmbed(AudioItem item, User user) {
-        EmbedBuilder embedBuilder = new EmbedBuilder();
+        String name;
+        String url;
+        long durationMillis;
 
         if (item instanceof AudioTrack track) {
-            bot.getPresence().setPresence(OnlineStatus.IDLE, Activity.listening(track.getInfo().title));
-            embedBuilder.addField("Queuing Track", MarkdownUtil.maskedLink(MarkdownUtil.monospace(track.getInfo().title), track.getInfo().uri), true);
-            embedBuilder.addField("Requested By", "<@" + user.getId() + ">", true);
-            embedBuilder.addField("Duration", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(track.getDuration()))), true);
+            AudioTrackInfo info = track.getInfo();
+            name = info.title;
+            url = info.uri;
+            durationMillis = track.getDuration();
         } else if (item instanceof AudioPlaylist playlist) {
-            if (playlist.isSearchResult()) {
-                bot.getPresence().setPresence(OnlineStatus.IDLE, Activity.listening(playlist.getSelectedTrack().getInfo().title));
-                embedBuilder.addField("Queuing Track", MarkdownUtil.maskedLink(playlist.getSelectedTrack().getInfo().title, playlist.getSelectedTrack().getInfo().uri), true);
-                embedBuilder.addField("Requested By", "<@" + user.getId() + ">", true);
-                embedBuilder.addField("Duration", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(playlist.getSelectedTrack().getDuration()))), true);
-            } else {
-                bot.getPresence().setPresence(OnlineStatus.ONLINE, Activity.listening(playlist.getName()));
-                embedBuilder.addField("Queuing Playlist", MarkdownUtil.monospace(playlist.getName()), true);
-                embedBuilder.addField("Requested By", "<@" + user.getId() + ">", true);
-                embedBuilder.addField("Duration", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(playlist.getTracks().stream().mapToLong(AudioTrack::getDuration).sum()))), true);
-            }
-        }
+            AudioTrack selectedTrack = playlist.getSelectedTrack();
 
-        return Utilities.appendEmbed(embedBuilder);
+            if (playlist.isSearchResult() && selectedTrack != null) {
+                AudioTrackInfo info = selectedTrack.getInfo();
+                name = info.title;
+                url = info.uri;
+                durationMillis = selectedTrack.getDuration();
+            } else {
+                name = playlist.getName();
+                AudioTrack firstTrack = selectedTrack != null ? selectedTrack : (!playlist.getTracks().isEmpty() ? playlist.getTracks().get(0) : null);
+                url = firstTrack != null ? firstTrack.getInfo().uri : "";
+                durationMillis = playlist.getTracks().stream().mapToLong(AudioTrack::getDuration).sum();
+            }
+        } else throw new IllegalArgumentException("Unsupported AudioItem: " + item.getClass().getCanonicalName());
+
+        return Utilities.appendEmbed(new EmbedBuilder()
+                .addField("Queuing Track", MarkdownUtil.maskedLink(name, url), true)
+                .addField("Requested By", user.getAsMention(), true)
+                .addField("Duration", MarkdownUtil.monospace(Utilities.getDuration(Duration.ofMillis(durationMillis))), true));
     }
 
     private static final AudioPlayerManager manager = new DefaultAudioPlayerManager();
@@ -61,7 +70,9 @@ public class MusicPlayer {
     private static final AudioPlayer player = musicManager.player;
 
     public static void playMusic() {
-        YoutubeAudioSourceManager source = new YoutubeAudioSourceManager(true, new Music(), new TvHtml5Embedded(), new Web());
+        YoutubeSourceOptions options = new YoutubeSourceOptions()
+                .setRemoteCipher("https://cipher.kikkia.dev/", "", "");
+        YoutubeAudioSourceManager source = new YoutubeAudioSourceManager(options, new Music(), new TvHtml5Simply(), new Web(), new AndroidVr(), new Tv());
         source.useOauth2(Config.REFRESH_TOKEN, (Config.REFRESH_TOKEN != null));
         manager.registerSourceManager(source);
 
@@ -88,9 +99,7 @@ public class MusicPlayer {
         ArrayList<AudioTrack> queue = new ArrayList<>(TrackScheduler.arrayQueue);
         if (TrackScheduler.shuffled) Collections.shuffle(queue);
         musicManager.scheduler.clearQueue();
-        for (AudioTrack track: queue) {
-            loadSong(track.getInfo().uri, null);
-        }
+        for (AudioTrack track: queue) loadSong(track.getInfo().uri, null);
     }
 
     public static void stopAndLoadSong(String url, SlashCommandInteractionEvent event) {

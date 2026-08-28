@@ -21,10 +21,7 @@ public class SongToTitleCacher {
         cache = new File("config/song_title.json");
         try {
             if (!cache.exists()) cache.createNewFile();
-            else {
-                Object obj = new JSONParser().parse(new FileReader(cache));
-                file = (JSONObject) obj;
-            }
+            else file = (JSONObject) new JSONParser().parse(new FileReader(cache));
         } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
         }
@@ -37,13 +34,8 @@ public class SongToTitleCacher {
         }
     }
 
-    public static boolean containsSongData(String identifier) {
-        return file.containsKey(identifier);
-    }
-
-    public static String fetchSongData(String identifier) {
-        return (String) file.getOrDefault(identifier, "");
-    }
+    public static boolean containsSongData(String identifier) { return file.containsKey(identifier); }
+    public static String fetchSongData(String identifier) { return (String) file.getOrDefault(identifier, ""); }
 
     public static void save() {
         try {

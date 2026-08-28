@@ -8,7 +8,6 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 public class MusicSendHandler implements AudioSendHandler {
-
     private final AudioPlayer player;
     private final ByteBuffer buffer;
     private final MutableAudioFrame frame;
@@ -20,19 +19,7 @@ public class MusicSendHandler implements AudioSendHandler {
         this.frame.setBuffer(buffer);
     }
 
-    @Override
-    public boolean canProvide() {
-        return this.player.provide(this.frame);
-    }
-
-    @Override
-    public ByteBuffer provide20MsAudio() {
-        final Buffer buffer = ((Buffer) this.buffer).flip();
-        return (ByteBuffer) buffer;
-    }
-
-    @Override
-    public boolean isOpus() {
-        return true;
-    }
+    public boolean canProvide() { return this.player.provide(this.frame); }
+    public ByteBuffer provide20MsAudio() { return (ByteBuffer) ((Buffer) this.buffer).flip(); }
+    public boolean isOpus() { return true; }
 }

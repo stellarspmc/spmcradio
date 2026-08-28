@@ -5,7 +5,6 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import org.jetbrains.annotations.NotNull;
 
 public class MusicManager {
-
     public final AudioPlayer player;
     public final TrackScheduler scheduler;
 
@@ -15,7 +14,5 @@ public class MusicManager {
         player.addListener(scheduler);
     }
 
-    public MusicSendHandler getSendHandler() {
-        return new MusicSendHandler(player);
-    }
+    public MusicSendHandler getSendHandler() { return new MusicSendHandler(player); }
 }

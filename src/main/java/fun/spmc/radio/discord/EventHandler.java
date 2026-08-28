@@ -189,9 +189,7 @@ public class EventHandler extends ListenerAdapter {
     public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
         if ((event.getName().equals("play") || event.getName().equals("queue")) && event.getFocusedOption().getName().equals("song")) {
             ArrayList<String> string = new ArrayList<>();
-            for (MusicType type : MusicType.values()) {
-                string.add(type.name().toLowerCase());
-            }
+            for (MusicType type : MusicType.values()) string.add(type.name().toLowerCase());
             try {
                 String[] type = string.toArray(new String[]{});
 

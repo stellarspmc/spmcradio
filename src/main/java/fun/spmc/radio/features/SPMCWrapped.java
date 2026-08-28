@@ -21,10 +21,7 @@ public class SPMCWrapped {
         wrappedFile = new File("config/wrapped.json");
         try {
             if (!wrappedFile.exists()) wrappedFile.createNewFile();
-            else {
-                Object obj = new JSONParser().parse(new FileReader(wrappedFile));
-                file = (JSONObject) obj;
-            }
+            else file = (JSONObject) new JSONParser().parse(new FileReader(wrappedFile));
         } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
         }
@@ -32,6 +29,7 @@ public class SPMCWrapped {
 
     public static void addUserData(User user, AudioTrack track, long joinDuration) {
         HashMap<String, Long> userSongList = new HashMap<>(fetchUserSongList(user));
+        if (track == null) return;
         long duration = track.getPosition() - joinDuration;
         if (duration <= 0) return;
         if (user.isBot()) return;
@@ -66,18 +64,13 @@ public class SPMCWrapped {
         HashMap<String, Long> userSongList = new HashMap<>(fetchUserSongList(user));
         ArrayList<Long> list = new ArrayList<>();
 
-        for (Map.Entry<String, Long> entry : userSongList.entrySet()) {
-            list.add(entry.getValue());
-        }
+        for (Map.Entry<String, Long> entry : userSongList.entrySet()) list.add(entry.getValue());
 
         list.sort(Collections.reverseOrder());
         List<Map.Entry<String, Long>> sortedArray = new ArrayList<>();
 
-        for (long str : list) {
-            for (Map.Entry<String, Long> entry : userSongList.entrySet()) {
+        for (long str : list) for (Map.Entry<String, Long> entry : userSongList.entrySet())
                 if (entry.getValue().equals(str)) sortedArray.add(entry);
-            }
-        }
 
         if (sortedArray.size() > 5) sortedArray = sortedArray.subList(0, 5);
         return sortedArray;
