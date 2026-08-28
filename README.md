@@ -6,14 +6,13 @@ The only reason for it to exist is that Groovy was shut down.
 - 24/7 (require your own hosting)
 - config?
 - cool embeds?
-- default selection of Chinese, Japanese and English songs lol
 - cool wrapper thing lol
 
 ## Testing Server
 [Join here](https://dc.spmc.fun)
 
 ## Stable Build
-The now stable build is v3.13 / 3.1.3 available for download at [here](https://github.com/stellarspmc/spmcradio/releases/tag/3.1.3).
+The now stable build is v3.3 available for download at [here](https://github.com/stellarspmc/spmcradio/releases/).
 
 Docker version: https://hub.docker.com/repository/docker/tcfplayz/musicspmc/general
 

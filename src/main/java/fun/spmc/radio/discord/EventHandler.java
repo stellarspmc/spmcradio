@@ -69,27 +69,11 @@ public class EventHandler extends ListenerAdapter {
         switch (e.getName()) {
             case "play" -> {
                 String url = Objects.requireNonNull(e.getOption("song")).getAsString();
-                for (MusicType type: MusicType.values()) {
-                    if (url.equalsIgnoreCase(type.name())) {
-                        MusicPlayer.stopAndLoadSong(type.getUrl(), e);
-                        return;
-                    }
-                }
-
-                url = isValidURL(url) ? url : "ytmsearch:" + url;
-                MusicPlayer.stopAndLoadSong(url, e);
+                MusicPlayer.stopAndLoadSong(isValidURL(url) ? url : "ytmsearch:" + url, e);
             }
             case "queue" -> {
                 String url = Objects.requireNonNull(e.getOption("song")).getAsString();
-                for (MusicType type: MusicType.values()) {
-                    if (url.equals(type.name().toLowerCase()) || url.equals(type.name().toUpperCase())) {
-                        MusicPlayer.loadSong(type.getUrl(), e);
-                        return;
-                    }
-                }
-
-                url = isValidURL(url) ? url : "ytmsearch:" + url;
-                MusicPlayer.loadSong(url, e);
+                MusicPlayer.loadSong(isValidURL(url) ? url : "ytmsearch:" + url, e);
             }
             case "nowplaying" -> e.replyEmbeds(getNowPlayingEmbed()).queue();
             case "queuelist" -> e.replyEmbeds(getQueueListEmbed()).queue();
@@ -186,32 +170,12 @@ public class EventHandler extends ListenerAdapter {
     }
 
     @Override
-    public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
-        if ((event.getName().equals("play") || event.getName().equals("queue")) && event.getFocusedOption().getName().equals("song")) {
-            ArrayList<String> string = new ArrayList<>();
-            for (MusicType type : MusicType.values()) string.add(type.name().toLowerCase());
-            try {
-                String[] type = string.toArray(new String[]{});
-
-                Collection<Command.Choice> options = Stream.of(type)
-                        .filter(word -> word.startsWith(event.getFocusedOption().getValue()))
-                        .map(word -> new Command.Choice(word, word))
-                        .collect(Collectors.toList());
-                event.replyChoices(options).queue();
-            } catch (ClassCastException e) {
-                log.error(e.getMessage());
-            }
-        }
-    }
-
-    @Override
     public void onGuildVoiceUpdate(@NotNull GuildVoiceUpdateEvent event) {
         long durationNow = 0;
         if (TrackScheduler.getPlayingTrack() != null) durationNow = TrackScheduler.getPlayingTrack().getPosition();
 
         if (Objects.equals(event.getChannelJoined(), bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID))) usersInCall.put(event.getEntity(), durationNow);
         else if (Objects.equals(event.getChannelLeft(), bot.getVoiceChannelById(Config.MUSIC_CHANNEL_ID))) {
-            System.out.println(usersInCall);
             SPMCWrapped.addUserData(event.getEntity().getUser(), TrackScheduler.getPlayingTrack(), usersInCall.get(event.getEntity()));
             SPMCWrapped.save();
             usersInCall.remove(event.getEntity());
