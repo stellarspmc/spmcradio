@@ -19,7 +19,7 @@ jobs:
           cache: maven
       - run: mvn verify
 
-      - name: Build with Gradle
+      - name: Build
         run: mvn package
 
       - name: Prepare JAR File
